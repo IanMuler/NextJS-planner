@@ -12,6 +12,7 @@ import {
   TasksContainer,
   ArrowIcon,
   Title,
+  RefreshButton,
 } from "styles/Home";
 import { handleDragEnd } from "utils/handleDragEnd";
 import { DragDropContext } from "react-beautiful-dnd";
@@ -47,7 +48,7 @@ export default function Home() {
   const { tasks, updateTask, getTasks } = tasks_context;
   const { todos, deleteTodo, getTodos } = todos_context;
   const isDragging = isDraggingTodo || isDraggingTask;
-  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+  const [isDesktop, setIsDesktop] = useState<boolean>(true);
 
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipe(
     updateVisible,
@@ -63,7 +64,6 @@ export default function Home() {
   useEffect(() => {
     getTasks();
     getTodos();
-
     if (window?.innerWidth > 768) {
       setIsDesktop(true);
     } else {
@@ -131,11 +131,18 @@ export default function Home() {
                     />
                     <Options>
                       {!isDesktop && <DeleteIcon isDragging={isDraggingTodo} />}
-                      <RefreshIcon
-                        onClick={() =>
-                          refreshToDoList(tasks, todos, updateTask, deleteTodo)
-                        }
-                      />
+                      <RefreshButton>
+                        <RefreshIcon
+                          onClick={() =>
+                            refreshToDoList(
+                              tasks,
+                              todos,
+                              updateTask,
+                              deleteTodo
+                            )
+                          }
+                        />
+                      </RefreshButton>
                       {!isDesktop && (
                         <ArrowIcon
                           onClick={() => {

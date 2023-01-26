@@ -77,8 +77,13 @@ export const Options = styled.div`
 export const ArrowIcon = styled(ArrowFromRight)``;
 
 export const RefreshIcon = styled(Refresh)`
-  width: 30px;
   cursor: pointer;
+`;
+
+export const RefreshButton = styled.button`
+  width: 30px;
+  border: none;
+  background-color: transparent;
 `;
 
 export const TasksContainer = styled.div`
