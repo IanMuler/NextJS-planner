@@ -11,10 +11,10 @@ import { ITodosState, Todo } from "./state";
 export interface ITodosAction {
   type: string;
   payload:
-    | Todo
     | Task
     | Todo["id"]
     | ITodosState["todos"]
+    | { todo: Todo; destination: number }
     | { id: Todo["id"]; changes: Partial<Todo> };
 }
 
@@ -30,11 +30,14 @@ export default function reducer(state: ITodosState, action: ITodosAction) {
       };
 
     case ADD_TODO:
-      const todo_add = payload as Todo;
+      const todo_add = payload as { todo: Todo; destination: number };
+
+      const ordered_todos = state.todos;
+      ordered_todos.splice(todo_add.destination, 0, todo_add.todo);
 
       return {
         ...state,
-        todos: [...state.todos, todo_add],
+        todos: ordered_todos,
       };
 
     case DELETE_TODO:

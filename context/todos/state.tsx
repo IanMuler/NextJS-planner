@@ -16,7 +16,7 @@ export interface ITodosState {
 
 export interface ITodosContext extends ITodosState {
   getTodos: () => void;
-  addTodo: (task: Task) => void;
+  addTodo: (task: Task, destination: number) => void;
   deleteTodo: (id: Todo["id"]) => void;
   updateTodo: (id: Todo["id"], changes: Partial<Todo>) => void;
   updateTodos: (todos: ITodosState["todos"]) => void;
@@ -41,7 +41,7 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
     dispatch({ type: GET_TODOS, payload: todos });
   };
 
-  const addTodo: ITodosContext["addTodo"] = (task) => {
+  const addTodo: ITodosContext["addTodo"] = (task, destination) => {
     const { assigned, ...rest } = task;
     const id = v4();
     const todo: Todo = {
@@ -52,7 +52,7 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
       from_id: task.id,
     };
 
-    dispatch({ type: ADD_TODO, payload: todo });
+    dispatch({ type: ADD_TODO, payload: { todo, destination } });
   };
 
   const deleteTodo: ITodosContext["deleteTodo"] = (id) =>

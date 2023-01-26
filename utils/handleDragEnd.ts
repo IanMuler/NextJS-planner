@@ -15,7 +15,7 @@ interface IResult {
 
 export const handleDragEnd = (result: IResult, contexts: IContexts) => {
   const { destination, source } = result;
-  const { tasks, updateTask, deleteTask, updateTasks } = contexts.tasks_context;
+  const { tasks, updateTask, updateTasks } = contexts.tasks_context;
   const { todos, addTodo, updateTodos, deleteTodo } = contexts.todos_context;
   const { updateDraggingTodo } = contexts.general_context;
 
@@ -72,7 +72,7 @@ export const handleDragEnd = (result: IResult, contexts: IContexts) => {
   ) {
     const task: Task = tasks[source.droppableId][source.index];
     updateTask(task.id, { assigned: true });
-    addTodo(task);
+    addTodo(task, destination.index);
   }
 
   if (
