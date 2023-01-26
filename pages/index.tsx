@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useState, useContext, useReducer } from "react";
+import { useEffect, useState, useContext } from "react";
 import {
   Container,
   Header,
@@ -12,7 +12,6 @@ import {
   TasksContainer,
   ArrowIcon,
   Title,
-  RefreshButton,
 } from "styles/Home";
 import { handleDragEnd } from "utils/handleDragEnd";
 import { DragDropContext } from "react-beautiful-dnd";
@@ -131,18 +130,11 @@ export default function Home() {
                     />
                     <Options>
                       {!isDesktop && <DeleteIcon isDragging={isDraggingTodo} />}
-                      <RefreshButton>
-                        <RefreshIcon
-                          onClick={() =>
-                            refreshToDoList(
-                              tasks,
-                              todos,
-                              updateTask,
-                              deleteTodo
-                            )
-                          }
-                        />
-                      </RefreshButton>
+                      <RefreshIcon
+                        onClick={() =>
+                          refreshToDoList(tasks, todos, updateTask, deleteTodo)
+                        }
+                      />
                       {!isDesktop && (
                         <ArrowIcon
                           onClick={() => {

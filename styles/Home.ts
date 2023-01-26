@@ -80,12 +80,6 @@ export const RefreshIcon = styled(Refresh)`
   cursor: pointer;
 `;
 
-export const RefreshButton = styled.button`
-  width: 30px;
-  border: none;
-  background-color: transparent;
-`;
-
 export const TasksContainer = styled.div`
   position: absolute;
   top: 0;
