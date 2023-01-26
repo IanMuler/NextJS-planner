@@ -43,6 +43,7 @@ export default function Home() {
     loading,
     updateVisible,
     updateStart,
+    getStart,
   } = general_context;
   const { tasks, updateTask, getTasks } = tasks_context;
   const { todos, deleteTodo, getTodos } = todos_context;
@@ -63,6 +64,8 @@ export default function Home() {
   useEffect(() => {
     getTasks();
     getTodos();
+    getStart();
+
     if (window?.innerWidth > 768) {
       setIsDesktop(true);
     } else {
@@ -71,11 +74,18 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // update tasks, todos and wakeUpTime in local storage every time they change
   useEffect(() => {
-    // update tasks and todos in local storage every time they change
     localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
+
+  useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
-  }, [tasks, todos]);
+  }, [todos]);
+
+  useEffect(() => {
+    localStorage.setItem("wakeUpTime", wakeUpTime);
+  }, [wakeUpTime]);
 
   const handleWakeUpTime = (e) => {
     updateStart(e.target.value);

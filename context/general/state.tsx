@@ -17,6 +17,7 @@ export interface IGeneralState {
 }
 
 export interface IGeneralContext extends IGeneralState {
+  getStart: () => void;
   updateStart: (time: string) => void;
   updateVisible: (value: boolean) => void;
   updateDraggingTodo: (value: boolean) => void;
@@ -41,6 +42,10 @@ const GeneralProvider = ({ children }: { children: JSX.Element }) => {
     React.Reducer<IGeneralState, IGeneralAction>
   >(reducer, initialState);
 
+  const getStart: IGeneralContext["getStart"] = () => {
+    const wakeUpTime = localStorage.getItem("wakeUpTime");
+    if (wakeUpTime) dispatch({ type: UPDATE_START, payload: wakeUpTime });
+  };
   const updateStart: IGeneralContext["updateStart"] = (time) =>
     dispatch({ type: UPDATE_START, payload: time });
   const updateVisible: IGeneralContext["updateVisible"] = (value) =>
@@ -60,6 +65,7 @@ const GeneralProvider = ({ children }: { children: JSX.Element }) => {
         isDraggingTodo: state.isDraggingTodo,
         isDraggingTask: state.isDraggingTask,
         loading: state.loading,
+        getStart,
         updateStart,
         updateVisible,
         updateDraggingTodo,

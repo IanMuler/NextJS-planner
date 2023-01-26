@@ -1,7 +1,8 @@
 import { IGeneralState } from "./state";
 import {
-  UPDATE_VISIBLE,
+  GET_START,
   UPDATE_START,
+  UPDATE_VISIBLE,
   UPDATE_DRAGGING_TODO,
   UPDATE_DRAGGING_TASK,
   UPDATE_LOADING,
@@ -19,11 +20,18 @@ export default function reducer(
   const { payload, type } = action;
 
   switch (type) {
-    case UPDATE_START:
-      const wakeUpTime = payload as string;
+    case GET_START:
+      const start_get = payload as string;
       return {
         ...state,
-        wakeUpTime,
+        wakeUpTime: start_get,
+      };
+
+    case UPDATE_START:
+      const start_upd = payload as string;
+      return {
+        ...state,
+        wakeUpTime: start_upd,
       };
 
     case UPDATE_VISIBLE:
