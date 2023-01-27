@@ -10,14 +10,14 @@ export interface Task {
   id: string;
   draggableId: string;
   assigned: boolean;
-  category: "general" | "daily" | "once";
+  category: "daily" | "weekly" | "other";
 }
 
 export interface ITasksState {
   tasks: {
-    general: Task[];
     daily: Task[];
-    once: Task[];
+    weekly: Task[];
+    other: Task[];
   };
 }
 
@@ -31,9 +31,9 @@ export interface ITasksContext extends ITasksState {
 
 const initialState: ITasksState = {
   tasks: {
-    general: [],
     daily: [],
-    once: [],
+    weekly: [],
+    other: [],
   },
 };
 

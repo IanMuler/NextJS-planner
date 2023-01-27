@@ -11,6 +11,11 @@ export const theme = {
       },
     },
   },
+  todos: {
+    list: {
+      minWidth: "25%",
+    },
+  },
   colors: {
     red: "#ff000063",
     white: "#ffffff",

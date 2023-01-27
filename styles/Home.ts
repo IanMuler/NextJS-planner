@@ -38,7 +38,7 @@ export const TodoContainer = styled.div`
     }
 
     height: 100%;
-    min-width: 25%;
+    min-width: ${theme.todos.list.minWidth};
     display: flex;
     justify-content: space-between;
     flex-direction: column;
@@ -80,7 +80,7 @@ export const RefreshIcon = styled(Refresh)`
   cursor: pointer;
 `;
 
-export const TasksContainer = styled.div`
+export const TasksContainer = styled.div<{ visible: boolean; top: number }>`
   position: absolute;
   top: 0;
   left: ${(props) => (props.visible ? "0" : "100%")};
@@ -93,10 +93,14 @@ export const TasksContainer = styled.div`
   overflow-y: auto;
 
   ${up("md")} {
+    width: calc(100% - ${theme.todos.list.minWidth} - 12rem);
     height: 80vh;
     display: flex;
     justify-content: space-between;
-    position: static;
+    position: fixed;
+    top: ${(props) => props.top}px;
+    left: auto;
+    right: 4rem;
     background-color: transparent;
     padding: 0;
   }
