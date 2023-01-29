@@ -24,6 +24,7 @@ import DeleteIcon from "components/delete-icon";
 import LoadingSpinner from "components/loading-spinner";
 import { TasksContext, type ITasksContext } from "context/tasks/state";
 import { TodosContext, type ITodosContext } from "context/todos/state";
+import Templates from "components/templates";
 
 export interface IContexts {
   general_context: IGeneralContext;
@@ -173,6 +174,8 @@ export default function Home() {
                     </TodoOptions>
                   </div>
                   <TodoList wakeUpTime={wakeUpTime} />
+                  {/* at this moment only desktop version has templates */}
+                  {isDesktop && <Templates />}
                 </TodoContainer>
                 <TasksContainer visible={tasksVisible} top={todoTop}>
                   <TaskList category="daily" />

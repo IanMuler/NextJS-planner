@@ -11,6 +11,8 @@ import { ServerStyleSheet } from "styled-components";
 
 type Props = {};
 
+// This MyDocument is a custom document that is used to charge styled-components in SSR
+// and to make react-beautiful-dnd work with Next.js
 class MyDocument extends Document<Props> {
   static async getInitialProps(
     ctx: DocumentContext
