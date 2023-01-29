@@ -1,14 +1,8 @@
 import { useContext, useState } from "react";
 import { Droppable, Draggable } from "react-beautiful-dnd";
 import TaskItem from "../item";
-import {
-  Container,
-  CreateTask,
-  CreateIcon,
-  Title,
-  Tasks,
-  Header,
-} from "./style";
+import CreateIcon from "components/create-icon";
+import { Container, Title, Tasks, Header } from "./style";
 import { Task, TasksContext } from "context/tasks/state";
 import TaskForm from "../form";
 
@@ -33,14 +27,12 @@ const TaskList = ({ category }: IComponentProps) => {
           {/* first letter capitalized */}
           {category.charAt(0).toUpperCase() + category.slice(1)}
         </Title>
-        <CreateTask
+        <CreateIcon
           onClick={() => {
             setFormVisible(!formVisible);
             setEditId(null);
           }}
-        >
-          <CreateIcon />
-        </CreateTask>
+        />
       </Header>
 
       {formVisible && (
