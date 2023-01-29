@@ -75,11 +75,10 @@ const Templates = () => {
             />
           )}
           {templates.map((template) => (
-            <TemplateItem
-              key={template.id}
-              onClick={() => assignTemplate(template.todos)}
-            >
-              <TemplateText>{template.name}</TemplateText>
+            <TemplateItem key={template.id}>
+              <TemplateText onClick={() => assignTemplate(template.todos)}>
+                {template.name}
+              </TemplateText>
               <DeleteIcon onClick={() => deleteTemplate(template.id)} />
             </TemplateItem>
           ))}
