@@ -27,35 +27,35 @@ const TaskList = ({ category }: IComponentProps) => {
   };
 
   return (
-    <Droppable droppableId={category}>
-      {(droppableProvided) => (
-        <Container
-          {...droppableProvided.droppableProps}
-          ref={droppableProvided.innerRef}
+    <Container>
+      <Header>
+        <Title>
+          {/* first letter capitalized */}
+          {category.charAt(0).toUpperCase() + category.slice(1)}
+        </Title>
+        <CreateTask
+          onClick={() => {
+            setFormVisible(!formVisible);
+            setEditId(null);
+          }}
         >
-          <Header>
-            <Title>
-              {/* first letter capitalized */}
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </Title>
-            <CreateTask
-              onClick={() => {
-                setFormVisible(!formVisible);
-                setEditId(null);
-              }}
-            >
-              <CreateIcon />
-            </CreateTask>
-          </Header>
+          <CreateIcon />
+        </CreateTask>
+      </Header>
 
-          {formVisible && (
-            <TaskForm
-              editId={editId}
-              category={category}
-              setFormVisible={setFormVisible}
-            />
-          )}
-          <Tasks>
+      {formVisible && (
+        <TaskForm
+          editId={editId}
+          category={category}
+          setFormVisible={setFormVisible}
+        />
+      )}
+      <Droppable droppableId={category}>
+        {(droppableProvided) => (
+          <Tasks
+            {...droppableProvided.droppableProps}
+            ref={droppableProvided.innerRef}
+          >
             {tasks[category].map((task, index) => (
               <Draggable
                 key={task.draggableId}
@@ -79,9 +79,9 @@ const TaskList = ({ category }: IComponentProps) => {
             ))}
             {droppableProvided.placeholder}
           </Tasks>
-        </Container>
-      )}
-    </Droppable>
+        )}
+      </Droppable>
+    </Container>
   );
 };
 
