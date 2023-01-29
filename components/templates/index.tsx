@@ -60,7 +60,7 @@ const Templates = () => {
         <TemplateItems>
           <Create onClick={() => setForm(!form)}>
             <CreateIcon size="sm" />
-            <CreateText>Add actual list as template</CreateText>
+            <CreateText>Add current list as template</CreateText>
           </Create>
           {form && (
             <NameInput
