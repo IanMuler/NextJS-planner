@@ -19,10 +19,11 @@ import CreateIcon from "components/create-icon";
 const Templates = () => {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
   const { templates, getTemplates, addTemplate, deleteTemplate } =
     useContext(TemplatesContext);
   const { todos, updateTodos } = useContext(TodosContext);
-  const ref = useRef<HTMLDivElement>(null);
 
   useClickOutside(ref, () => handleOpen(false));
 
