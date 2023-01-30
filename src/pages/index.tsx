@@ -9,7 +9,6 @@ import {
   TodoContainer,
   TodoOptions,
   Options,
-  TasksContainer,
   ArrowIcon,
   Title,
 } from "styles/Home";
@@ -17,7 +16,7 @@ import { handleDragEnd } from "utils/handleDragEnd";
 import { DragDropContext } from "react-beautiful-dnd";
 import { refreshToDoList } from "utils/todo";
 import TodoList from "components/todos/list";
-import TaskList from "components/tasks/list";
+import TasksContainer from "components/tasks/container";
 import { useSwipe } from "hooks/useSwipe";
 import { GeneralContext, type IGeneralContext } from "context/general/state";
 import DeleteIcon from "components/delete-icon";
@@ -65,8 +64,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    getTasks();
-    getTodos();
     getStart();
 
     if (window?.innerWidth > 768) {
@@ -76,15 +73,6 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // update tasks, todos and wakeUpTime in local storage every time they change
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
-
-  useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }, [todos]);
 
   useEffect(() => {
     localStorage.setItem("wakeUpTime", wakeUpTime);
@@ -177,11 +165,7 @@ export default function Home() {
                   {/* at this moment only desktop version has templates */}
                   {isDesktop && <Templates />}
                 </TodoContainer>
-                <TasksContainer visible={tasksVisible} top={todoTop}>
-                  <TaskList category="daily" />
-                  <TaskList category="weekly" />
-                  <TaskList category="other" />
-                </TasksContainer>
+                <TasksContainer visible={tasksVisible} top={todoTop} />
               </Container>
             )}
           </Application>
