@@ -1,19 +1,9 @@
 import { refreshToDo } from "./todo";
 import type { Task } from "context/tasks/state";
 import { IContexts } from "pages";
+import { DropResult } from "react-beautiful-dnd";
 
-interface IResult {
-  destination: {
-    droppableId: string;
-    index: number;
-  };
-  source: {
-    droppableId: string;
-    index: number;
-  };
-}
-
-export const handleDragEnd = (result: IResult, contexts: IContexts) => {
+export const handleDragEnd = (result: DropResult, contexts: IContexts) => {
   const { destination, source } = result;
   const { tasks, updateTask, updateTasks } = contexts.tasks_context;
   const { todos, addTodo, updateTodos, deleteTodo } = contexts.todos_context;
@@ -88,8 +78,9 @@ export const handleDragEnd = (result: IResult, contexts: IContexts) => {
         todos.filter((t) => t.text === todo.text).length === 1;
       if (onlyExistOne) updateTask(todo.from_id, { assigned: false });
       deleteTodo(todo.id);
-      // force isDraggingTodo to false, react-beautiful-dnd for some reason doesnt update isDragging
-      updateDraggingTodo(false);
+
+      // // force isDraggingTodo to false, react-beautiful-dnd for some reason doesnt update isDragging
+      // updateDraggingTodo(false);
     }
   }
 };
