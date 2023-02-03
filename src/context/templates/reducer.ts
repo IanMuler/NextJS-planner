@@ -1,9 +1,9 @@
-import { GET_TEMPLATES, ADD_TEMPLATE, DELETE_TEMPLATE } from "../types";
+import { SET_TEMPLATES, ADD_TEMPLATE, DELETE_TEMPLATE } from "../types";
 import { ITemplatesState, Template } from "./state";
 
 export interface ITemplatesAction {
   type: string;
-  payload: Template | Template[] | Template["id"];
+  payload: Template | Template[] | Template["_id"];
 }
 
 export default function reducer(
@@ -13,7 +13,7 @@ export default function reducer(
   const { payload, type } = action;
 
   switch (type) {
-    case GET_TEMPLATES:
+    case SET_TEMPLATES:
       const templates = payload as Template[];
       return {
         ...state,
@@ -29,9 +29,9 @@ export default function reducer(
       };
 
     case DELETE_TEMPLATE:
-      const id = payload as Template["id"];
+      const id = payload as Template["_id"];
       const new_templates = state.templates.filter(
-        (template) => template.id !== id
+        (template) => template._id !== id
       );
 
       return {

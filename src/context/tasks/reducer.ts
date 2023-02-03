@@ -1,6 +1,6 @@
 import { ITasksState, Task } from "./state";
 import {
-  GET_TASKS,
+  SET_TASKS,
   ADD_TASK,
   DELETE_TASK,
   UPDATE_TASK,
@@ -12,8 +12,9 @@ export interface ITasksAction {
   payload:
     | Task
     | ITasksState["tasks"]
-    | Task["id"]
-    | { id: Task["id"]; changes: Partial<Task> };
+    | Partial<ITasksState["tasks"]>
+    | Task["_id"]
+    | { _id: Task["_id"]; changes: Partial<Task> };
 }
 
 export default function reducer(
@@ -23,7 +24,7 @@ export default function reducer(
   const { type, payload } = action;
 
   switch (type) {
-    case GET_TASKS:
+    case SET_TASKS:
       const tasks = payload as ITasksState["tasks"];
       return {
         ...state,
@@ -41,10 +42,10 @@ export default function reducer(
       };
 
     case DELETE_TASK:
-      const id = payload as Task["id"];
+      const id = payload as Task["_id"];
       const task_del = Object.keys(state.tasks).reduce((acc, category) => {
-        const task = state.tasks[category].find((t) => {
-          return t.id === id;
+        const task: Task = state.tasks[category].find((t) => {
+          return t._id === id;
         });
         if (task) {
           acc = task;
@@ -57,15 +58,15 @@ export default function reducer(
         tasks: {
           ...state.tasks,
           [task_del.category]: state.tasks[task_del.category].filter(
-            (t) => t.id !== task_del.id
+            (t) => t._id !== task_del._id
           ),
         },
       };
 
     case UPDATE_TASK:
-      const upd_data = payload as { id: Task["id"]; changes: Partial<Task> };
+      const upd_data = payload as { _id: Task["_id"]; changes: Partial<Task> };
       const task_upd = Object.keys(state.tasks).reduce((acc, category) => {
-        const task = state.tasks[category]?.find((t) => t.id === upd_data.id);
+        const task = state.tasks[category]?.find((t) => t._id === upd_data._id);
         if (task) {
           acc = { ...task, ...upd_data.changes };
         }
@@ -77,16 +78,20 @@ export default function reducer(
         tasks: {
           ...state.tasks,
           [task_upd.category]: state.tasks[task_upd.category]?.map((task) =>
-            task.id === task_upd.id ? task_upd : task
+            task._id === task_upd._id ? task_upd : task
           ),
         },
       };
 
     case UPDATE_TASKS:
-      const tasks_upd = payload as ITasksState["tasks"];
+      const tasks_upd = payload as Partial<ITasksState["tasks"]>;
+
       return {
         ...state,
-        tasks: tasks_upd,
+        tasks: {
+          ...state.tasks,
+          ...tasks_upd,
+        },
       };
 
     default:

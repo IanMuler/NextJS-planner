@@ -1,9 +1,9 @@
-import { Task } from "context/tasks/state";
 import {
   UPDATE_TODO,
   DELETE_TODO,
-  GET_TODOS,
+  SET_TODOS,
   ADD_TODO,
+  DELETE_TODOS,
   UPDATE_TODOS,
 } from "../types";
 import { ITodosState, Todo } from "./state";
@@ -11,18 +11,22 @@ import { ITodosState, Todo } from "./state";
 export interface ITodosAction {
   type: string;
   payload:
-    | Task
-    | Todo["id"]
+    | Todo
+    | Todo["_id"]
+    | Todo["_id"][]
     | ITodosState["todos"]
     | { todo: Todo; destination: number }
-    | { id: Todo["id"]; changes: Partial<Todo> };
+    | {
+        id: Todo["_id"] | Todo["draggableId"] | Todo["from_id"];
+        changes: Partial<Todo>;
+      };
 }
 
 export default function reducer(state: ITodosState, action: ITodosAction) {
   const { payload, type } = action;
 
   switch (type) {
-    case GET_TODOS:
+    case SET_TODOS:
       const todos = payload as Todo[];
       return {
         ...state,
@@ -30,10 +34,11 @@ export default function reducer(state: ITodosState, action: ITodosAction) {
       };
 
     case ADD_TODO:
-      const todo_add = payload as { todo: Todo; destination: number };
+      const todo_add = payload as Todo;
 
-      const ordered_todos = state.todos;
-      ordered_todos.splice(todo_add.destination, 0, todo_add.todo);
+      const ordered_todos = [...state.todos, todo_add].sort(
+        (a, b) => a.order - b.order
+      );
 
       return {
         ...state,
@@ -41,14 +46,14 @@ export default function reducer(state: ITodosState, action: ITodosAction) {
       };
 
     case DELETE_TODO:
-      const id = payload as Todo["id"];
+      const id = payload as Todo["_id"];
       const new_todos = state.todos.filter(
-        (todo) => todo.id !== id && todo.from_id !== id
+        (todo) => todo._id !== id && todo.from_id !== id
       );
 
       //new_todos must have at least one todo with start = null
       //to refresh the start generator function
-      new_todos[0].start = null;
+      if (new_todos.length > 0) new_todos[0].start = null;
 
       return {
         ...state,
@@ -56,18 +61,27 @@ export default function reducer(state: ITodosState, action: ITodosAction) {
       };
 
     case UPDATE_TODO:
-      //"update todo" could be call editing a task or a todo, so we need accept "id" and "from_id",
-      // and we need to update all the todos that have the same id or from_id
-      const upd_data = payload as { id: Todo["id"]; changes: Partial<Todo> };
-
+      const upd_data = payload as {
+        id: Todo["_id"] | Todo["draggableId"];
+        changes: Partial<Todo>;
+      };
       return {
         ...state,
         todos: state.todos.map((todo) => {
-          if (todo.id === upd_data.id || todo.from_id === upd_data.id) {
+          if (todo._id === upd_data.id || todo.draggableId === upd_data.id) {
             return { ...todo, ...upd_data.changes };
           }
           return todo;
         }),
+      };
+
+    case DELETE_TODOS:
+      const ids = payload as Todo["_id"][];
+      const todos_del = state.todos.filter((todo) => !ids.includes(todo._id));
+
+      return {
+        ...state,
+        todos: todos_del,
       };
 
     case UPDATE_TODOS:
