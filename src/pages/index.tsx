@@ -26,7 +26,7 @@ import { Todo, TodosContext, type ITodosContext } from "context/todos/state";
 import { Template, TemplatesContext } from "context/templates/state";
 import Templates from "components/templates";
 import { get_tasks } from "api/tasks";
-import { GetStaticProps, NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
 import { get_todos } from "api/todos";
 import { get_templates } from "api/templates";
 
@@ -59,7 +59,7 @@ const Home: NextPage<IPageProps> = ({ db_tasks, db_todos, db_templates }) => {
   } = general_context;
   const { tasks, updateTasks, setTasks } = tasks_context;
   const { todos, deleteTodos, setTodos } = todos_context;
-  const { templates, setTemplates } = templates_context;
+  const { setTemplates } = templates_context;
 
   const [todoTop, setTodoTop] = useState<number>(0);
   const [isDesktop, setIsDesktop] = useState<boolean>(false);
@@ -194,7 +194,7 @@ const Home: NextPage<IPageProps> = ({ db_tasks, db_todos, db_templates }) => {
 
 export default Home;
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   const tasks_response = await get_tasks();
   const todos_response = await get_todos();
   const templates_response = await get_templates();

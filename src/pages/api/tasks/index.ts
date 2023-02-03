@@ -33,16 +33,11 @@ export default async function TasksHandler(
     case "PATCH":
       try {
         const tasks: ITask[] = body;
-        //Use bulkWrite to update multiple documents at once
-        //bulkWrite don't return the updated documents, so we need to query them again
-        await Task.bulkWrite(
-          tasks.map((task) => ({
-            updateOne: {
-              filter: { _id: task._id },
-              update: { $set: { ...task } },
-            },
-          }))
+
+        const updatePromises = tasks.map((task) =>
+          Task.updateOne({ _id: task._id }, { $set: { ...task } })
         );
+        await Promise.all(updatePromises);
 
         const updatedTasks: HydratedDocument<ITask>[] =
           await Task.findAllTasks();

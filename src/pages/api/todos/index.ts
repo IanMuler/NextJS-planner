@@ -1,5 +1,5 @@
 import Todo, { ITodo } from "models/Todo";
-import { HydratedDocument } from "mongoose";
+import { HydratedDocument, Schema } from "mongoose";
 import { NextApiRequest, NextApiResponse } from "next";
 // import { getSession } from "next-auth/client";
 import { dbConnect } from "utils/mongoose";
@@ -42,16 +42,11 @@ export default async function TodosHandler(
     case "PATCH":
       try {
         const todos: ITodo[] = body;
-        //Use bulkWrite to update multiple documents at once
-        //bulkWrite don't return the updated documents, so we need to query them again
-        await Todo.bulkWrite(
-          todos.map((todo) => ({
-            updateOne: {
-              filter: { _id: todo._id },
-              update: { $set: { ...todo } },
-            },
-          }))
+
+        const updatePromises = todos.map((todo) =>
+          Todo.updateOne({ _id: todo._id }, { $set: { ...todo } })
         );
+        await Promise.all(updatePromises);
 
         const updatedTodos: HydratedDocument<ITodo>[] =
           await Todo.findAllTodos();

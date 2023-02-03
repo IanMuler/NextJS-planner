@@ -33,7 +33,7 @@ const Templates = () => {
   };
 
   const assignTemplate = (new_todos: ITodosContext["todos"]) => {
-    deleteTodos(todos);
+    deleteTodos(todos.map((todo) => todo._id));
     addTodos(new_todos);
     setOpen(false);
   };
