@@ -12,10 +12,10 @@ interface IComponentProps {
 
 const TaskList = ({ category }: IComponentProps) => {
   const [formVisible, setFormVisible] = useState<boolean>(false);
-  const [editId, setEditId] = useState<Task["id"] | null>(null);
+  const [editId, setEditId] = useState<Task["_id"] | null>(null);
   const { tasks } = useContext(TasksContext);
 
-  const setEditForm = (id: Task["id"]) => {
+  const setEditForm = (id: Task["_id"]) => {
     setEditId(id);
     setFormVisible(true);
   };

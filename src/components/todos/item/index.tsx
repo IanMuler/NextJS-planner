@@ -13,7 +13,6 @@ const TodoItem = ({ todo, isDragging }: IComponentProps) => {
 
   useEffect(() => {
     updateDraggingTodo(isDragging);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDragging]);
 
   //When wake up time is like "07:00" it will be converted to "7:00"

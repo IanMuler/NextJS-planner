@@ -14,7 +14,7 @@ import {
 } from "./style";
 
 interface IComponentProps {
-  setEditForm: (id: Task["id"]) => void;
+  setEditForm: (id: Task["_id"]) => void;
   task: Task;
   isDragging: boolean;
 }
@@ -22,18 +22,19 @@ interface IComponentProps {
 const TaskItem = ({ task, setEditForm, isDragging }: IComponentProps) => {
   const [hover, setHover] = useState<boolean>(false);
   const { deleteTask } = useContext(TasksContext);
-  const { deleteTodo } = useContext(TodosContext);
+  const { todos, deleteTodo } = useContext(TodosContext);
   const { updateDraggingTask, updateVisible } = useContext(GeneralContext);
 
   useEffect(() => {
     updateDraggingTask(isDragging);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDragging]);
 
-  const handleDelete = (id: Task["id"]) => {
+  const handleDelete = (id: Task["_id"]) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       deleteTask(id);
-      if (task.assigned) deleteTodo(id);
+
+      const todoExists = todos.find((todo) => todo.from_id === id);
+      if (task.assigned && todoExists) deleteTodo(id);
     }
   };
 
@@ -52,12 +53,12 @@ const TaskItem = ({ task, setEditForm, isDragging }: IComponentProps) => {
           <Options>
             <EditIcon
               onClick={() => {
-                setEditForm(task.id);
+                setEditForm(task._id);
               }}
             />
             <DeleteIcon
               onClick={() => {
-                handleDelete(task.id);
+                handleDelete(task._id);
               }}
             />
           </Options>

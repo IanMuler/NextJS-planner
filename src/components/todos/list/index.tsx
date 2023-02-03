@@ -6,21 +6,11 @@ import { addWakeUpTime } from "utils/todo";
 import { TodosContext } from "context/todos/state";
 
 const TodoList = ({ wakeUpTime }) => {
-  const { todos, updateTodo, addTodo, getTodos } = useContext(TodosContext);
+  const { todos, updateTodos } = useContext(TodosContext);
 
   useEffect(() => {
-    getTodos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (todos.length > 0) addWakeUpTime(todos, updateTodo, wakeUpTime);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [todos, wakeUpTime, addTodo]);
-
-  useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }, [todos]);
+    // if (todos.length > 0) addWakeUpTime(todos, updateTodos, wakeUpTime);
+  }, [todos, wakeUpTime]);
 
   return (
     <Droppable droppableId="todo">

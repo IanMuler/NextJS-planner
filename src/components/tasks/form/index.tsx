@@ -10,11 +10,11 @@ import {
 } from "./style";
 
 export interface ITaskForm extends Pick<Task, "text" | "duration"> {
-  id?: Task["id"];
+  _id?: Task["_id"];
 }
 
 interface IComponentProps {
-  editId?: Task["id"];
+  editId?: Task["_id"];
   category?: Task["category"];
   setFormVisible: (value: boolean) => void;
 }
@@ -26,7 +26,7 @@ const TaskForm = ({ editId, category, setFormVisible }: IComponentProps) => {
   };
 
   const [formState, setFormState] = useState<ITaskForm>(initialState);
-  const { updateTodo } = useContext(TodosContext);
+  const { todos, updateTodo } = useContext(TodosContext);
   const { tasks, updateTask, addTask } = useContext(TasksContext);
 
   const selectOptions: string[] = [
@@ -67,23 +67,29 @@ const TaskForm = ({ editId, category, setFormVisible }: IComponentProps) => {
 
   useEffect(() => {
     if (editId) {
-      const task = tasks[category].find((task) => task.id === editId);
-      const { text, duration, id } = task;
-      setFormState({ text, duration, id });
+      const task = tasks[category].find((task) => task._id === editId);
+      const { text, duration, _id } = task;
+      setFormState({ text, duration, _id });
     } else {
       setFormState({ ...initialState });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editId]);
 
   const handlePress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" || e.type === "click") {
       if (formState.text && formState.duration) {
-        if (formState.id) {
-          updateTask(formState.id, formState);
-          updateTodo(formState.id, {
-            text: formState.text,
-            duration: formState.duration,
+        if (formState._id) {
+          updateTask(formState._id, formState);
+
+          const todos_from_task = todos.filter(
+            (todo) => todo.from_id === formState._id
+          );
+          console.log(todos_from_task);
+          todos_from_task.forEach((todo) => {
+            updateTodo(todo._id, {
+              text: formState.text,
+              duration: formState.duration,
+            });
           });
         } else {
           addTask(formState, category);
