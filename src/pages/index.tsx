@@ -21,9 +21,14 @@ import { useSwipe } from "hooks/useSwipe";
 import { GeneralContext, type IGeneralContext } from "context/general/state";
 import DeleteIcon from "components/delete-icon";
 import LoadingSpinner from "components/loading-spinner";
-import { TasksContext, type ITasksContext } from "context/tasks/state";
-import { TodosContext, type ITodosContext } from "context/todos/state";
+import { Task, TasksContext, type ITasksContext } from "context/tasks/state";
+import { Todo, TodosContext, type ITodosContext } from "context/todos/state";
+import { Template, TemplatesContext } from "context/templates/state";
 import Templates from "components/templates";
+import { get_tasks } from "api/tasks";
+import { GetStaticProps, NextPage } from "next";
+import { get_todos } from "api/todos";
+import { get_templates } from "api/templates";
 
 export interface IContexts {
   general_context: IGeneralContext;
@@ -31,10 +36,17 @@ export interface IContexts {
   todos_context: ITodosContext;
 }
 
-export default function Home() {
+interface IPageProps {
+  db_tasks: Task[];
+  db_todos: Todo[];
+  db_templates: Template[];
+}
+
+const Home: NextPage<IPageProps> = ({ db_tasks, db_todos, db_templates }) => {
   const general_context = useContext(GeneralContext);
   const tasks_context = useContext(TasksContext);
   const todos_context = useContext(TodosContext);
+  const templates_context = useContext(TemplatesContext);
   const {
     wakeUpTime,
     tasksVisible,
@@ -45,33 +57,38 @@ export default function Home() {
     updateStart,
     getStart,
   } = general_context;
-  const { tasks, updateTask, getTasks } = tasks_context;
-  const { todos, deleteTodo, getTodos } = todos_context;
-  const isDragging = isDraggingTodo || isDraggingTask;
-  const [isDesktop, setIsDesktop] = useState<boolean>(true);
-  const todoRef = useRef<HTMLDivElement>(null); //ref to get todo top position to set tasks container fixed position
-  const [todoTop, setTodoTop] = useState<number>(0);
+  const { tasks, updateTasks, setTasks } = tasks_context;
+  const { todos, deleteTodos, setTodos } = todos_context;
+  const { templates, setTemplates } = templates_context;
 
+  const [todoTop, setTodoTop] = useState<number>(0);
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+  const isDragging = isDraggingTodo || isDraggingTask;
+  const todoRef = useRef<HTMLDivElement>(null); //ref to get todo top position to set tasks container fixed position
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipe(
     updateVisible,
     isDragging
   );
-
   const contexts: IContexts = {
     general_context,
     tasks_context,
     todos_context,
   };
 
-  useEffect(() => {
-    getStart();
-
-    if (window?.innerWidth > 768) {
+  const handleDesktop = () => {
+    if (window.innerWidth > 768) {
       setIsDesktop(true);
     } else {
       setIsDesktop(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  };
+
+  useEffect(() => {
+    getStart();
+    handleDesktop();
+    setTemplates(db_templates);
+    setTasks(db_tasks);
+    setTodos(db_todos);
   }, []);
 
   useEffect(() => {
@@ -146,8 +163,8 @@ export default function Home() {
                             refreshToDoList(
                               tasks,
                               todos,
-                              updateTask,
-                              deleteTodo
+                              updateTasks,
+                              deleteTodos
                             )
                           }
                         />
@@ -163,7 +180,7 @@ export default function Home() {
                   </div>
                   <TodoList wakeUpTime={wakeUpTime} />
                   {/* at this moment only desktop version has templates */}
-                  {isDesktop && <Templates />}
+                  <Templates />
                 </TodoContainer>
                 <TasksContainer visible={tasksVisible} top={todoTop} />
               </Container>
@@ -173,4 +190,24 @@ export default function Home() {
       </main>
     </>
   );
-}
+};
+
+export default Home;
+
+export const getStaticProps: GetStaticProps = async () => {
+  const tasks_response = await get_tasks();
+  const todos_response = await get_todos();
+  const templates_response = await get_templates();
+
+  const db_tasks = tasks_response.data;
+  const db_todos = todos_response.data;
+  const db_templates = templates_response.data;
+
+  return {
+    props: {
+      db_tasks,
+      db_todos,
+      db_templates,
+    },
+  };
+};
