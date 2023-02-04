@@ -47,6 +47,7 @@ export default async function TasksHandler(
         res.status(400).json({ success: false });
       }
       break;
+
     default:
       res.status(400).json({ success: false, message: "Invalid method" });
       break;
