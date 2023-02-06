@@ -33,8 +33,10 @@ const TaskItem = ({ task, setEditForm, isDragging }: IComponentProps) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       deleteTask(id);
 
-      const todoExists = todos.find((todo) => todo.from_id === id);
-      if (task.assigned && todoExists) deleteTodo(id);
+      const todos_from_task = todos.filter((todo) => todo.from_id === id);
+      todos_from_task.forEach((todo) => {
+        if (task.assigned) deleteTodo(todo._id);
+      });
     }
   };
 

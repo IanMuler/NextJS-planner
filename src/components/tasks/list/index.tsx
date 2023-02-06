@@ -48,7 +48,7 @@ const TaskList = ({ category }: IComponentProps) => {
             {...droppableProvided.droppableProps}
             ref={droppableProvided.innerRef}
           >
-            {tasks[category].map((task, index) => (
+            {tasks[category]?.map((task, index) => (
               <Draggable
                 key={task.draggableId}
                 draggableId={task.draggableId}

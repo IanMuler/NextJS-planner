@@ -15,6 +15,8 @@ import { Template, TemplatesContext } from "context/templates/state";
 import { ITodosContext, TodosContext } from "context/todos/state";
 import { useClickOutside } from "hooks/useClickOutside";
 import CreateIcon from "components/create-icon";
+import { disassignTasks } from "utils/tasks";
+import { TasksContext } from "context/tasks/state";
 
 const Templates = () => {
   const [open, setOpen] = useState(false);
@@ -24,6 +26,7 @@ const Templates = () => {
   const { templates, addTemplate, deleteTemplate } =
     useContext(TemplatesContext);
   const { todos, addTodos, deleteTodos } = useContext(TodosContext);
+  const { tasks, updateTasks } = useContext(TasksContext);
 
   useClickOutside(ref, () => handleOpen(false));
 
@@ -35,6 +38,10 @@ const Templates = () => {
   const assignTemplate = (new_todos: ITodosContext["todos"]) => {
     deleteTodos(todos.map((todo) => todo._id));
     addTodos(new_todos);
+
+    const tasks_disassigned = disassignTasks(tasks);
+    updateTasks(tasks_disassigned);
+
     setOpen(false);
   };
 
