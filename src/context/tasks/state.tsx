@@ -84,7 +84,7 @@ const TasksProvider = ({ children }: { children: JSX.Element }) => {
       draggableId: id,
       assigned: false,
       category,
-      order: state.tasks[category].length,
+      order: state.tasks[category]?.length || 0,
     };
 
     try {

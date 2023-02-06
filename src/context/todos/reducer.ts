@@ -17,7 +17,7 @@ export interface ITodosAction {
     | ITodosState["todos"]
     | { todo: Todo; destination: number }
     | {
-        id: Todo["_id"] | Todo["draggableId"] | Todo["from_id"];
+        id: Todo["_id"] | Todo["draggableId"];
         changes: Partial<Todo>;
       };
 }
@@ -50,10 +50,6 @@ export default function reducer(state: ITodosState, action: ITodosAction) {
       const new_todos = state.todos.filter(
         (todo) => todo._id !== id && todo.from_id !== id
       );
-
-      //new_todos must have at least one todo with start = null
-      //to refresh the start generator function
-      if (new_todos.length > 0) new_todos[0].start = null;
 
       return {
         ...state,

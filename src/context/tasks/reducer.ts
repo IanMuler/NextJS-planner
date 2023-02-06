@@ -33,11 +33,16 @@ export default function reducer(
 
     case ADD_TASK:
       const task_add = payload as Task;
+
+      const category_tasks = state.tasks[task_add.category] // prevent error when category is empty
+        ? [...state.tasks[task_add.category]]
+        : [];
+
       return {
         ...state,
         tasks: {
           ...state.tasks,
-          [task_add.category]: [...state.tasks[task_add.category], task_add],
+          [task_add.category]: [...category_tasks, task_add],
         },
       };
 
