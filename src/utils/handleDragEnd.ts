@@ -7,7 +7,7 @@ import { Todo } from "context/todos/state";
 export const handleDragEnd = (result: DropResult, contexts: IContexts) => {
   const { destination, source } = result;
   const { tasks, updateTask, updateTasks } = contexts.tasks_context;
-  const { todos, addTodo, updateTodos, deleteTodo } = contexts.todos_context;
+  const { todos, addTodo, updateTodos } = contexts.todos_context;
 
   if (!destination) {
     return;
@@ -46,7 +46,7 @@ export const handleDragEnd = (result: DropResult, contexts: IContexts) => {
 
       todo_tasks[source.index].order = destination.index;
 
-      updateTodos(todo_tasks.map((todo) => ({ ...todo, start: null })));
+      updateTodos(todo_tasks);
     } else {
       const category_tasks: Task[] = [...tasks[source.droppableId]];
       //reasign order property to every task depending on the destination of the drag

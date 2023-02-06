@@ -3,6 +3,7 @@ import { ITasksContext, Task } from "context/tasks/state";
 import { ITodosContext, Todo } from "context/todos/state";
 import { IContexts } from "pages";
 import { addTime } from "./addTime";
+import { disassignTasks } from "./tasks";
 
 type RefreshToDoList = (
   tasks: ITasksContext["tasks"],
@@ -19,17 +20,8 @@ export const refreshToDoList: RefreshToDoList = (
 ) => {
   if (todos.length > 0) {
     if (window.confirm("Are you sure you want to delete all tasks?")) {
-      // An array of tasks that are assigned and then disassigned
-      const tasks_list = Object.values(tasks).reduce((acumulator, category) => {
-        const tasks_assigned = category.filter((task) => task.assigned);
-        const tasks_disassigned = tasks_assigned.map((task) => ({
-          ...task,
-          assigned: false,
-        }));
-        return [...acumulator, ...tasks_disassigned];
-      }, [] as Task[]);
-
-      updateTasks(tasks_list);
+      const tasks_disassigned = disassignTasks(tasks);
+      updateTasks(tasks_disassigned);
 
       deleteTodos(todos.map((todo) => todo._id));
     }
@@ -62,23 +54,30 @@ export const addWakeUpTime: AddWakeUpTime = (
   wakeUpTime
 ) => {
   const todos_list = [...todos];
-  if (
-    // false if every task has start time and there is wake up time
-    // true if wake up time and first task start time are the same
-    (!todos_list.every((todo) => todo.start) && wakeUpTime) ||
-    wakeUpTime !== todos_list[0].start
-  ) {
-    todos_list.forEach((todo, index) => {
-      const start = todos_list
-        .slice(0, index)
-        .reduce(
-          (acumulator, todo) => addTime(acumulator, todo.duration),
-          wakeUpTime
-        );
+  todos_list.forEach((todo, index) => {
+    const start = todos_list
+      .slice(0, index)
+      .reduce(
+        (acumulator, todo) => addTime(acumulator, todo.duration),
+        wakeUpTime
+      );
 
-      todo.start = start;
-    });
+    todo.start = start;
+  });
 
-    updateTodos(todos_list);
+  updateTodos(todos_list);
+};
+
+export const isTodoStartsUpdated = (todos: Todo[]) => {
+  let isUpdated = true;
+
+  for (let index = 0; index < todos.length - 1; index++) {
+    const nextStartIsUpdate =
+      addTime(todos[index].start, todos[index].duration) ===
+      todos[index + 1]?.start;
+
+    if (!todos[index].start || !nextStartIsUpdate) isUpdated = false;
   }
+
+  return isUpdated;
 };
