@@ -1,13 +1,28 @@
 import React, { createContext, useReducer } from "react";
-import { GET_TODOS, ADD_TODO, UPDATE_TODO, DELETE_TODO } from "../types";
+import {
+  SET_TODOS,
+  ADD_TODO,
+  UPDATE_TODO,
+  DELETE_TODO,
+  DELETE_TODOS,
+  UPDATE_TODOS,
+} from "../types";
 import reducer, { ITodosAction } from "./reducer";
 import { Task } from "../tasks/state";
 import { v4 } from "uuid";
+import {
+  add_todo,
+  delete_todo,
+  update_todo,
+  update_todos,
+  delete_todos,
+  add_todos,
+} from "api/todos";
+import isEqual from "lodash.isequal";
 
-//all "Task" properties less "assigned"
 export interface Todo extends Omit<Task, "assigned"> {
-  start: string; // time when the task must be started
-  from_id: string; // id of the task from which this todo was created
+  start?: string;
+  from_id: Task["_id"];
 }
 
 export interface ITodosState {
@@ -15,10 +30,12 @@ export interface ITodosState {
 }
 
 export interface ITodosContext extends ITodosState {
-  getTodos: () => void;
+  setTodos: (todos: ITodosState["todos"]) => void;
   addTodo: (task: Task, destination: number) => void;
-  deleteTodo: (id: Todo["id"]) => void;
-  updateTodo: (id: Todo["id"], changes: Partial<Todo>) => void;
+  addTodos: (todos: ITodosState["todos"]) => void;
+  deleteTodo: (id: Todo["_id"]) => void;
+  updateTodo: (id: Todo["_id"], changes: Partial<Todo>) => void;
+  deleteTodos: (ids: Todo["_id"][]) => void;
   updateTodos: (todos: ITodosState["todos"]) => void;
 }
 
@@ -35,44 +52,146 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
     React.Reducer<ITodosState, ITodosAction>
   >(reducer, initialState);
 
-  const getTodos: ITodosContext["getTodos"] = () => {
-    const todos =
-      JSON.parse(localStorage.getItem("todos")) || initialState.todos;
-    dispatch({ type: GET_TODOS, payload: todos });
+  const setTodos: ITodosContext["setTodos"] = (todos) => {
+    const sortedTodos = todos.sort((a, b) => a.order - b.order);
+
+    dispatch({ type: SET_TODOS, payload: sortedTodos });
   };
 
-  const addTodo: ITodosContext["addTodo"] = (task, destination) => {
-    const { assigned, ...rest } = task;
-    const id = v4();
+  const addTodo: ITodosContext["addTodo"] = async (task, destination) => {
+    const prev_todos = [...state.todos];
+
+    const { _id, assigned, ...rest } = task;
+    const id: Todo["draggableId"] = v4();
     const todo: Todo = {
       ...rest,
       start: null,
-      id,
-      draggableId: `_${id}`,
-      from_id: task.id,
+      draggableId: id,
+      from_id: _id,
+      order: destination,
     };
 
-    dispatch({ type: ADD_TODO, payload: { todo, destination } });
+    dispatch({ type: ADD_TODO, payload: todo });
+
+    try {
+      const todo_response = await add_todo(todo);
+      const todo_data = todo_response.data;
+
+      // update the todo with the new _id
+      dispatch({
+        type: UPDATE_TODO,
+        payload: {
+          id: todo_data.draggableId,
+          changes: { _id: todo_data._id },
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      dispatch({ type: SET_TODOS, payload: prev_todos });
+    }
   };
 
-  const deleteTodo: ITodosContext["deleteTodo"] = (id) =>
-    dispatch({ type: DELETE_TODO, payload: id });
+  const addTodos: ITodosContext["addTodos"] = async (todos) => {
+    const prev_todos = [...state.todos];
 
-  const updateTodo: ITodosContext["updateTodo"] = (id, changes) =>
-    dispatch({ type: UPDATE_TODO, payload: { id, changes } });
+    try {
+      const todos_response = await add_todos(todos);
+      const todos_data = todos_response.data;
 
-  const updateTodos: ITodosContext["updateTodos"] = (todos) =>
-    dispatch({ type: GET_TODOS, payload: todos });
+      dispatch({ type: SET_TODOS, payload: todos_data });
+    } catch (error) {
+      console.error(error);
+      dispatch({ type: SET_TODOS, payload: prev_todos });
+    }
+  };
+
+  const deleteTodo: ITodosContext["deleteTodo"] = async (id) => {
+    const prev_todos = [...state.todos];
+
+    const todo_del = state.todos.find(
+      (todo) => todo._id === id || todo.from_id === id
+    );
+
+    dispatch({ type: DELETE_TODO, payload: todo_del._id });
+    try {
+      const todo_response = await delete_todo(todo_del._id);
+      const todo_data = todo_response.data;
+
+      if (!isEqual(todo_data, todo_del)) {
+        dispatch({ type: DELETE_TODO, payload: todo_data._id });
+      }
+    } catch (error) {
+      console.error(error);
+      dispatch({ type: SET_TODOS, payload: prev_todos });
+    }
+  };
+
+  const updateTodo: ITodosContext["updateTodo"] = async (id, changes) => {
+    const todo_upd = state.todos.find((todo) => todo._id === id);
+
+    try {
+      const todo_response = await update_todo(todo_upd._id, changes);
+      const todo_data = todo_response.data;
+      dispatch({ type: UPDATE_TODO, payload: { id: todo_data._id, changes } });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const deleteTodos: ITodosContext["deleteTodos"] = async (ids) => {
+    const prev_todos = [...state.todos];
+    const todos_del = state.todos.filter((todo) => ids.includes(todo._id));
+    dispatch({
+      type: DELETE_TODOS,
+      payload: todos_del.map((todo) => todo._id),
+    });
+
+    try {
+      const todos_response = await delete_todos(ids);
+      // todos_data is an array of the current todos
+      const todos_data = todos_response.data;
+
+      if (todos_data.length > 0) {
+        dispatch({ type: SET_TODOS, payload: todos_data });
+      }
+    } catch (error) {
+      console.error(error);
+      dispatch({ type: SET_TODOS, payload: prev_todos });
+    }
+  };
+
+  const updateTodos: ITodosContext["updateTodos"] = async (todos) => {
+    const prev_todos = [...state.todos];
+
+    const sorted_todos = todos.sort((a, b) => a.order - b.order);
+    dispatch({ type: UPDATE_TODOS, payload: sorted_todos });
+    try {
+      const todos_response = await update_todos(todos);
+      const todos_data = todos_response.data;
+      const sorted_todos_data = todos_data.sort((a, b) => a.order - b.order);
+
+      if (!isEqual(sorted_todos_data, sorted_todos)) {
+        dispatch({ type: UPDATE_TODOS, payload: sorted_todos_data });
+      }
+    } catch (error) {
+      console.error(error);
+
+      // If there is an error, revert the state to the previous state
+      dispatch({ type: UPDATE_TODOS, payload: prev_todos });
+    }
+  };
 
   return (
     <TodosContext.Provider
       value={{
         todos: state.todos,
-        getTodos,
+        setTodos,
         addTodo,
+        addTodos,
         deleteTodo,
         updateTodo,
         updateTodos,
+        deleteTodos,
       }}
     >
       {children}

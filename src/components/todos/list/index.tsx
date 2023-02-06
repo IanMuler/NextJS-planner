@@ -2,25 +2,21 @@ import { useContext, useEffect } from "react";
 import { Droppable, Draggable } from "react-beautiful-dnd";
 import { Todos, NoItems } from "./style";
 import TodoItem from "../item";
-import { addWakeUpTime } from "utils/todo";
+import { addWakeUpTime, isTodoStartsUpdated } from "utils/todo";
 import { TodosContext } from "context/todos/state";
 
 const TodoList = ({ wakeUpTime }) => {
-  const { todos, updateTodo, addTodo, getTodos } = useContext(TodosContext);
+  const { todos, updateTodos } = useContext(TodosContext);
 
   useEffect(() => {
-    getTodos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!wakeUpTime || todos.length === 0) return;
 
-  useEffect(() => {
-    if (todos.length > 0) addWakeUpTime(todos, updateTodo, wakeUpTime);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [todos, wakeUpTime, addTodo]);
+    const isFirstStartRight: boolean = todos[0].start === wakeUpTime;
 
-  useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }, [todos]);
+    if (isFirstStartRight && isTodoStartsUpdated(todos)) return;
+
+    addWakeUpTime(todos, updateTodos, wakeUpTime);
+  }, [todos, wakeUpTime]);
 
   return (
     <Droppable droppableId="todo">

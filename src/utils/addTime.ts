@@ -1,5 +1,20 @@
 type AddTime = (time1: string, time2: string) => string;
 
+/**
+ * addTime function adds two times and returns the result in the format hh:mm,
+ * following the 24h format.
+ *
+ * @param {string} time1
+ * @param {string} time2
+ *
+ * @example
+ * addTime("04:00", "05:00") // 09:00
+ * addTime("22:00", "04:00") // 02:00
+ * addTime("12:00", "13:00") // 01:00
+ *
+ * @returns {string} time1 + time2
+ */
+
 export const addTime: AddTime = (time1, time2) => {
   if (time1 && time2) {
     const time1Arr = time1?.split(":");

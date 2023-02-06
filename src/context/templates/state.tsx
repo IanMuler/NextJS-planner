@@ -1,11 +1,11 @@
 import React, { createContext, useReducer } from "react";
-import { GET_TEMPLATES, ADD_TEMPLATE, DELETE_TEMPLATE } from "../types";
+import { SET_TEMPLATES, ADD_TEMPLATE, DELETE_TEMPLATE } from "../types";
 import reducer, { ITemplatesAction } from "./reducer";
 import { Todo } from "../todos/state";
-import { v4 } from "uuid";
+import { add_template, delete_template } from "api/templates";
 
 export interface Template {
-  id: string;
+  _id?: string;
   name: string;
   todos: Todo[];
 }
@@ -15,9 +15,9 @@ export interface ITemplatesState {
 }
 
 export interface ITemplatesContext extends ITemplatesState {
-  getTemplates: () => void;
+  setTemplates: (templates: Template[]) => void;
   addTemplate: (name: Template["name"], todos: Template["todos"]) => void;
-  deleteTemplate: (id: Template["id"]) => void;
+  deleteTemplate: (id: Template["_id"]) => void;
 }
 
 const initialState: ITemplatesState = {
@@ -33,31 +33,41 @@ const TemplatesProvider = ({ children }: { children: JSX.Element }) => {
     React.Reducer<ITemplatesState, ITemplatesAction>
   >(reducer, initialState);
 
-  const getTemplates: ITemplatesContext["getTemplates"] = () => {
-    const templates: Template[] =
-      JSON.parse(localStorage.getItem("templates")) || initialState.templates;
-    dispatch({ type: GET_TEMPLATES, payload: templates });
+  const setTemplates: ITemplatesContext["setTemplates"] = (templates) => {
+    dispatch({ type: SET_TEMPLATES, payload: templates });
   };
 
-  const addTemplate: ITemplatesContext["addTemplate"] = (name, todos) => {
-    const id = v4();
+  const addTemplate: ITemplatesContext["addTemplate"] = async (name, todos) => {
     const template: Template = {
-      id,
       name,
       todos,
     };
 
-    dispatch({ type: ADD_TEMPLATE, payload: template });
+    try {
+      const template_response = await add_template(template);
+      const template_data = template_response.data;
+
+      dispatch({ type: ADD_TEMPLATE, payload: template_data });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const deleteTemplate: ITemplatesContext["deleteTemplate"] = (id) =>
-    dispatch({ type: DELETE_TEMPLATE, payload: id });
+  const deleteTemplate: ITemplatesContext["deleteTemplate"] = async (id) => {
+    try {
+      const template_response = await delete_template(id);
+      const template_data = template_response.data;
+      dispatch({ type: DELETE_TEMPLATE, payload: template_data._id });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <TemplatesContext.Provider
       value={{
         templates: state.templates,
-        getTemplates,
+        setTemplates,
         addTemplate,
         deleteTemplate,
       }}
