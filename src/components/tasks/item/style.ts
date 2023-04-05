@@ -7,6 +7,26 @@ export const Container = styled.li`
   padding-bottom: 1rem;
 `;
 
+export const Options = styled.div`
+  color: #000;
+  width: 50px;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background: transparent;
+  gap: 5px;
+
+  > * {
+    cursor: pointer;
+  }
+`;
+
+export const Duration = styled.span`
+  width: 50px;
+  text-align: center;
+`;
+
 export const Item = styled.div<{ assigned: boolean }>`
   font-size: ${theme.font.size.sm.task};
   padding: 1.5rem;
@@ -17,6 +37,14 @@ export const Item = styled.div<{ assigned: boolean }>`
   color: ${(props) => (props.assigned ? "#ababab" : "inherit")};
   border-radius: 10px;
 
+  &:hover > ${Options} {
+    display: flex;
+  }
+
+  &:hover > ${Duration} {
+    display: none;
+  }
+
   ${up("md")} {
     font-size: ${theme.font.size.xl.task};
     height: 40px;
@@ -24,30 +52,10 @@ export const Item = styled.div<{ assigned: boolean }>`
   }
 `;
 
-export const Duration = styled.span`
-  width: 50px;
-  text-align: center;
-`;
-
 export const Text = styled.span`
   width: calc(100% - 50px);
   text-align: center;
   overflow-wrap: break-word;
-`;
-
-export const Options = styled.div`
-  color: #000;
-  width: 50px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: none;
-  background: transparent;
-  gap: 5px;
-
-  > * {
-    cursor: pointer;
-  }
 `;
 
 export const EditIcon = styled(Create)``;

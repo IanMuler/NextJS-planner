@@ -20,7 +20,6 @@ interface IComponentProps {
 }
 
 const TaskItem = ({ task, setEditForm, isDragging }: IComponentProps) => {
-  const [hover, setHover] = useState<boolean>(false);
   const { deleteTask } = useContext(TasksContext);
   const { todos, deleteTodo } = useContext(TodosContext);
   const { updateDraggingTask, updateVisible } = useContext(GeneralContext);
@@ -46,30 +45,26 @@ const TaskItem = ({ task, setEditForm, isDragging }: IComponentProps) => {
       to Item cannot be added margin-bottom so padding-bottom will be added here  */}
       <Item
         assigned={task.assigned}
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
         onTouchMove={() => isDragging && updateVisible(false)}
       >
         <Text>{task.text}</Text>
-        {hover && (
-          <Options>
-            <EditIcon
-              onClick={() => {
-                setEditForm(task._id);
-              }}
-            />
-            <DeleteIcon
-              onClick={() => {
-                handleDelete(task._id);
-              }}
-            />
-          </Options>
-        )}
-        {!hover && (
-          <Duration>
-            {task.duration !== "00:00" ? task.duration.slice(1) : null}
-          </Duration>
-        )}
+        {/*<Options> visible on hover */}
+        <Options>
+          <EditIcon
+            onClick={() => {
+              setEditForm(task._id);
+            }}
+          />
+          <DeleteIcon
+            onClick={() => {
+              handleDelete(task._id);
+            }}
+          />
+        </Options>
+        {/*<Duration> hidden on hover */}
+        <Duration>
+          {task.duration !== "00:00" ? task.duration.slice(1) : null}
+        </Duration>
       </Item>
     </Container>
   );
