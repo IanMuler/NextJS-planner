@@ -6,15 +6,9 @@ import { theme } from "./theme";
 
 export const Application = styled.div`
   padding: 1rem;
-  min-height: 100vh;
+  min-height: calc(100vh - ${theme.height.header});
   position: relative;
   overflow: hidden;
-`;
-
-export const Header = styled.div``;
-
-export const Title = styled.h1`
-  font-size: ${theme.font.size.sm.title};
 `;
 
 export const Container = styled.div`
