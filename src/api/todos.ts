@@ -16,8 +16,14 @@ interface ITodoResponse {
   };
 }
 
-export const get_todos = async (): Promise<ITodosResponse["data"]> => {
-  const response: ITodosResponse = await client.get("/api/todos");
+export const get_todos = async (
+  user: Todo["user"]
+): Promise<ITodosResponse["data"]> => {
+  const response: ITodosResponse = await client.get("/api/todos", {
+    params: {
+      user,
+    },
+  });
   return response.data;
 };
 
@@ -43,6 +49,7 @@ export const delete_todo = async (
 export const delete_todos = async (
   ids: Todo["_id"][]
 ): Promise<ITodosResponse["data"]> => {
+  if (!ids.length) return;
   const response: ITodosResponse = await client.delete("/api/todos", {
     data: { ids },
   });

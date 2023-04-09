@@ -16,12 +16,19 @@ interface ITaskResponse {
   };
 }
 
-export const get_tasks = async (): Promise<ITasksResponse["data"]> => {
-  const response: ITasksResponse = await client.get("/api/tasks");
+export const get_tasks = async (
+  user: Task["user"]
+): Promise<ITasksResponse["data"]> => {
+  const response: ITasksResponse = await client.get("/api/tasks", {
+    params: {
+      user,
+    },
+  });
   return response.data;
 };
 
 export const update_tasks = async (tasks: Task[]) => {
+  if (!tasks.length) return;
   const response: ITasksResponse = await client.patch("/api/tasks", tasks);
   return response.data;
 };

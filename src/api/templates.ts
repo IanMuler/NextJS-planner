@@ -15,8 +15,12 @@ interface ITemplateResponse {
   };
 }
 
-export const get_templates = async (): Promise<ITemplatesResponse["data"]> => {
-  const response: ITemplatesResponse = await client.get("/api/templates");
+export const get_templates = async (
+  user: Template["user"]
+): Promise<ITemplatesResponse["data"]> => {
+  const response: ITemplatesResponse = await client.get("/api/templates", {
+    params: { user },
+  });
   return response.data;
 };
 

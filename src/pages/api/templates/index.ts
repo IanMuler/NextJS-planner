@@ -10,15 +10,15 @@ export default async function TemplatesHandler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { method, body } = req;
+  const { method, body, query } = req;
   switch (method) {
     case "GET":
       try {
         const templates: HydratedDocument<ITemplate>[] =
-          await Template.findAllTemplates();
+          await Template.findAllTemplates(query.user as string);
         res.status(200).json({ success: true, data: templates });
       } catch (error) {
-        res.status(400).json({ success: false });
+        res.status(400).json({ success: false, error });
       }
       break;
 
@@ -28,7 +28,7 @@ export default async function TemplatesHandler(
         const saved_template = await template.save();
         res.status(201).json({ success: true, data: saved_template });
       } catch (error) {
-        res.status(400).json({ success: false });
+        res.status(400).json({ success: false, error });
       }
       break;
 
