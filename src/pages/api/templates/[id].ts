@@ -24,7 +24,7 @@ export default async function TemplateHandler(
           await Template.findByIdAndDelete(id);
         res.status(200).json({ success: true, data: template });
       } catch (error) {
-        res.status(400).json({ success: false });
+        res.status(400).json({ success: false, error });
       }
       break;
     default:

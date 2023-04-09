@@ -26,7 +26,7 @@ export default async function TodoHandler(
         );
         res.status(200).json({ success: true, data: todo });
       } catch (error) {
-        res.status(400).json({ success: false });
+        res.status(400).json({ success: false, error });
       }
       break;
     case "DELETE":
@@ -35,7 +35,7 @@ export default async function TodoHandler(
         const todo: HydratedDocument<ITodo> = await Todo.findByIdAndDelete(id);
         res.status(200).json({ success: true, data: todo });
       } catch (error) {
-        res.status(400).json({ success: false });
+        res.status(400).json({ success: false, error });
       }
       break;
     default:

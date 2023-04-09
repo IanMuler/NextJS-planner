@@ -26,7 +26,7 @@ export default async function TaskHandler(
         );
         res.status(200).json({ success: true, data: task });
       } catch (error) {
-        res.status(400).json({ success: false });
+        res.status(400).json({ success: false, error });
       }
       break;
     case "DELETE":
@@ -35,7 +35,7 @@ export default async function TaskHandler(
         const task: HydratedDocument<ITask> = await Task.findByIdAndDelete(id);
         res.status(200).json({ success: true, data: task });
       } catch (error) {
-        res.status(400).json({ success: false });
+        res.status(400).json({ success: false, error });
       }
       break;
     default:
