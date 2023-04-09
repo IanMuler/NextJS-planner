@@ -22,6 +22,7 @@ export interface Task {
   assigned: boolean;
   category: "daily" | "weekly" | "other";
   order: number;
+  user: string;
 }
 
 export interface ITasksState {
@@ -34,7 +35,11 @@ export interface ITasksState {
 
 export interface ITasksContext extends ITasksState {
   setTasks: (tasks: Task[]) => void;
-  addTask: (task_form: ITaskForm, category: Task["category"]) => void;
+  addTask: (
+    task_form: ITaskForm,
+    category: Task["category"],
+    user: Task["user"]
+  ) => void;
   deleteTask: (id: Task["_id"]) => void;
   updateTask: (id: Task["_id"], changes: Partial<Task>) => void;
   updateTasks: (tasks: Task[]) => void;
@@ -77,7 +82,11 @@ const TasksProvider = ({ children }: { children: JSX.Element }) => {
     dispatch({ type: SET_TASKS, payload: tasksObj });
   };
 
-  const addTask: ITasksContext["addTask"] = async (task_form, category) => {
+  const addTask: ITasksContext["addTask"] = async (
+    task_form,
+    category,
+    user
+  ) => {
     const id: Task["draggableId"] = v4();
     const task: Task = {
       ...task_form,
@@ -85,6 +94,7 @@ const TasksProvider = ({ children }: { children: JSX.Element }) => {
       assigned: false,
       category,
       order: state.tasks[category]?.length || 0,
+      user,
     };
 
     try {

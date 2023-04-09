@@ -22,7 +22,7 @@ import isEqual from "lodash.isequal";
 
 export interface Todo extends Omit<Task, "assigned"> {
   start?: string;
-  from_id: Task["_id"];
+  task: Task["_id"];
 }
 
 export interface ITodosState {
@@ -67,7 +67,7 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
       ...rest,
       start: null,
       draggableId: id,
-      from_id: _id,
+      task: _id,
       order: destination,
     };
 
@@ -109,7 +109,7 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
     const prev_todos = [...state.todos];
 
     const todo_del = state.todos.find(
-      (todo) => todo._id === id || todo.from_id === id
+      (todo) => todo._id === id || todo.task === id
     );
 
     dispatch({ type: DELETE_TODO, payload: todo_del._id });

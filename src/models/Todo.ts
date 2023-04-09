@@ -4,7 +4,7 @@ import { Schema, model, models, Model, HydratedDocument } from "mongoose";
 export interface ITodo extends Todo, Document {}
 
 export interface ITodoModel extends Model<ITodo, {}, {}> {
-  findAllTodos: () => HydratedDocument<ITodo>[];
+  findAllTodos: (user: ITodo["user"]) => HydratedDocument<ITodo>[];
 }
 
 const TodoSchema: Schema<ITodo> = new Schema<ITodo, ITodoModel>(
@@ -46,11 +46,15 @@ const TodoSchema: Schema<ITodo> = new Schema<ITodo, ITodoModel>(
       trim: true,
       maxlength: [7, "start cannot be grater than 7 characters"],
     },
-    from_id: {
+    task: {
       type: Schema.Types.ObjectId,
-      required: [true, "The todo from_id is required "],
+      ref: "Task",
+    },
+    user: {
+      type: String,
+      required: [true, "The task user is required "],
       trim: true,
-      maxlength: [40, "from_id cannot be grater than 40 characters"],
+      maxlength: [40, "user cannot be grater than 40 characters"],
     },
   },
   {
@@ -58,8 +62,8 @@ const TodoSchema: Schema<ITodo> = new Schema<ITodo, ITodoModel>(
   }
 );
 
-TodoSchema.statics.findAllTodos = async function () {
-  return await this.find({});
+TodoSchema.statics.findAllTodos = async function (user: ITodo["user"]) {
+  return await this.find({ user });
 };
 
 export default (models.Todo as ITodoModel) ||

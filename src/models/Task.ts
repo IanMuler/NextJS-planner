@@ -4,7 +4,7 @@ import { Schema, model, models, Model, HydratedDocument } from "mongoose";
 export interface ITask extends Task, Document {}
 
 export interface ITaskModel extends Model<ITask, {}, {}> {
-  findAllTasks: () => HydratedDocument<ITask>[];
+  findAllTasks: (user: ITask["user"]) => HydratedDocument<ITask>[];
 }
 
 const TaskSchema: Schema<ITask> = new Schema<ITask, ITaskModel>(
@@ -45,14 +45,20 @@ const TaskSchema: Schema<ITask> = new Schema<ITask, ITaskModel>(
       required: [true, "The task order is required "],
       default: 0,
     },
+    user: {
+      type: String,
+      required: [true, "The task user is required "],
+      trim: true,
+      maxlength: [40, "user cannot be grater than 40 characters"],
+    },
   },
   {
     versionKey: false,
   }
 );
 
-TaskSchema.statics.findAllTasks = async function () {
-  return await this.find({});
+TaskSchema.statics.findAllTasks = async function (user: ITask["user"]) {
+  return await this.find({ user });
 };
 
 export default (models.Task as ITaskModel) ||

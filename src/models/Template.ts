@@ -5,7 +5,7 @@ import Todo from "./Todo";
 export interface ITemplate extends Template, Document {}
 
 export interface ITemplateModel extends Model<ITemplate, {}, {}> {
-  findAllTemplates: () => HydratedDocument<ITemplate>[];
+  findAllTemplates: (user: ITemplate["user"]) => HydratedDocument<ITemplate>[];
 }
 
 const TemplateSchema: Schema<ITemplate> = new Schema<ITemplate, ITemplateModel>(
@@ -22,14 +22,22 @@ const TemplateSchema: Schema<ITemplate> = new Schema<ITemplate, ITemplateModel>(
       type: [Todo.schema],
       required: [true, "The template todos is required "],
     },
+    user: {
+      type: String,
+      required: [true, "The task user is required "],
+      trim: true,
+      maxlength: [40, "user cannot be grater than 40 characters"],
+    },
   },
   {
     versionKey: false,
   }
 );
 
-TemplateSchema.statics.findAllTemplates = async function () {
-  return await this.find({});
+TemplateSchema.statics.findAllTemplates = async function (
+  user: ITemplate["user"]
+) {
+  return await this.find({ user });
 };
 
 export default (models.Template as ITemplateModel) ||

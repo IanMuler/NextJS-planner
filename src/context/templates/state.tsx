@@ -8,6 +8,7 @@ export interface Template {
   _id?: string;
   name: string;
   todos: Todo[];
+  user: string;
 }
 
 export interface ITemplatesState {
@@ -41,6 +42,7 @@ const TemplatesProvider = ({ children }: { children: JSX.Element }) => {
     const template: Template = {
       name,
       todos,
+      user: todos[0].user,
     };
 
     try {
