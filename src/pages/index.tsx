@@ -26,6 +26,9 @@ import { get_tasks } from "api/tasks";
 import { GetServerSideProps, NextPage } from "next";
 import { get_todos } from "api/todos";
 import { get_templates } from "api/templates";
+import { authOptions } from "pages/api/auth/[...nextauth]";
+import { getServerSession } from "next-auth/next";
+import { useSession } from "next-auth/react";
 
 export interface IContexts {
   general_context: IGeneralContext;
@@ -40,6 +43,7 @@ interface IPageProps {
 }
 
 const Home: NextPage<IPageProps> = ({ db_tasks, db_todos, db_templates }) => {
+  const { data: session } = useSession();
   const general_context = useContext(GeneralContext);
   const tasks_context = useContext(TasksContext);
   const todos_context = useContext(TodosContext);
@@ -87,6 +91,22 @@ const Home: NextPage<IPageProps> = ({ db_tasks, db_todos, db_templates }) => {
     setTasks(db_tasks);
     setTodos(db_todos);
   }, []);
+
+  useEffect(() => {
+    if (db_tasks.length === 0 && db_todos.length === 0 && session?.user) {
+      const user_email = session.user.email;
+
+      get_tasks(user_email).then((res) => {
+        setTasks(res.data);
+      });
+      get_todos(user_email).then((res) => {
+        setTodos(res.data);
+      });
+      get_templates(user_email).then((res) => {
+        setTemplates(res.data);
+      });
+    }
+  }, [session?.user]);
 
   useEffect(() => {
     localStorage.setItem("wakeUpTime", wakeUpTime);
@@ -177,10 +197,13 @@ const Home: NextPage<IPageProps> = ({ db_tasks, db_todos, db_templates }) => {
 
 export default Home;
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  const tasks_response = await get_tasks();
-  const todos_response = await get_todos();
-  const templates_response = await get_templates();
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions);
+  const user_email = session?.user?.email;
+
+  const tasks_response = await get_tasks(user_email);
+  const todos_response = await get_todos(user_email);
+  const templates_response = await get_templates(user_email);
 
   const db_tasks = tasks_response.data;
   const db_todos = todos_response.data;
