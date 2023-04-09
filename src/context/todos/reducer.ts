@@ -48,7 +48,7 @@ export default function reducer(state: ITodosState, action: ITodosAction) {
     case DELETE_TODO:
       const id = payload as Todo["_id"];
       const new_todos = state.todos.filter(
-        (todo) => todo._id !== id && todo.from_id !== id
+        (todo) => todo._id !== id && todo.task !== id
       );
 
       return {

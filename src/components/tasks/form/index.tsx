@@ -1,5 +1,6 @@
 import { Task, TasksContext } from "context/tasks/state";
 import { TodosContext } from "context/todos/state";
+import { useSession } from "next-auth/react";
 import { useState, useContext, useEffect } from "react";
 import {
   ConfirmTask,
@@ -25,6 +26,7 @@ const TaskForm = ({ editId, category, setFormVisible }: IComponentProps) => {
     duration: "",
   };
 
+  const { data: session } = useSession();
   const [formState, setFormState] = useState<ITaskForm>(initialState);
   const { todos, updateTodo } = useContext(TodosContext);
   const { tasks, updateTask, addTask } = useContext(TasksContext);
@@ -82,9 +84,8 @@ const TaskForm = ({ editId, category, setFormVisible }: IComponentProps) => {
           updateTask(formState._id, formState);
 
           const todos_from_task = todos.filter(
-            (todo) => todo.from_id === formState._id
+            (todo) => todo.task === formState._id
           );
-          console.log(todos_from_task);
           todos_from_task.forEach((todo) => {
             updateTodo(todo._id, {
               text: formState.text,
@@ -92,7 +93,8 @@ const TaskForm = ({ editId, category, setFormVisible }: IComponentProps) => {
             });
           });
         } else {
-          addTask(formState, category);
+          const user_email = session?.user?.email;
+          addTask(formState, category, user_email);
         }
         setFormVisible(false);
         setFormState({ ...initialState });

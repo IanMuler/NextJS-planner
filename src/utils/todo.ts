@@ -36,9 +36,8 @@ export const refreshToDo: RefreshToDo = (todo, contexts) => {
   const { updateDraggingTodo } = contexts.general_context;
 
   deleteTodo(todo._id);
-  const onlyExistOne =
-    todos.filter((t) => t.from_id === todo.from_id).length === 1;
-  if (onlyExistOne) updateTask(todo.from_id, { assigned: false });
+  const onlyExistOne = todos.filter((t) => t.task === todo.task).length === 1;
+  if (onlyExistOne) updateTask(todo.task, { assigned: false });
   updateDraggingTodo(false);
 };
 
