@@ -35,14 +35,13 @@ const Templates = () => {
     form && setForm(false);
   };
 
-  const assignTemplate = (new_todos: ITodosContext["todos"]) => {
-    deleteTodos(todos.map((todo) => todo._id));
-    addTodos(new_todos);
+  const assignTemplate = async (new_todos: ITodosContext["todos"]) => {
+    setOpen(false);
+    await deleteTodos(todos.map((todo) => todo._id));
+    await addTodos(new_todos);
 
     const tasks_disassigned = disassignTasks(tasks);
     updateTasks(tasks_disassigned);
-
-    setOpen(false);
   };
 
   const createTemplate = (name: Template["name"]) => {
