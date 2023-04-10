@@ -2,12 +2,15 @@ import { refreshToDo } from "./todo";
 import type { Task } from "context/tasks/state";
 import { IContexts } from "pages";
 import { DropResult } from "react-beautiful-dnd";
+import { Todo } from "context/todos/state";
 
-export const handleDragEnd = (result: DropResult, contexts: IContexts) => {
+export const handleDragEnd = async (
+  result: DropResult,
+  contexts: IContexts
+) => {
   const { destination, source } = result;
   const { tasks, updateTask, updateTasks } = contexts.tasks_context;
-  const { todos, addTodo, updateTodos, deleteTodo } = contexts.todos_context;
-  const { updateDraggingTodo } = contexts.general_context;
+  const { todos, addTodo, updateTodos } = contexts.todos_context;
 
   if (!destination) {
     return;
@@ -34,24 +37,31 @@ export const handleDragEnd = (result: DropResult, contexts: IContexts) => {
     destination.droppableId === source.droppableId &&
     destination.index !== source.index
   ) {
+    const isMovingUp = destination.index < source.index;
+    let i = isMovingUp ? destination.index : source.index;
+
     if (source.droppableId === "todo") {
-      const new_todos = [...todos];
-      const [removed] = new_todos.splice(source.index, 1);
-      new_todos.splice(destination.index, 0, removed);
+      const todo_tasks: Todo[] = [...todos];
+      //every task list is ordered by order property
+      for (i; isMovingUp ? i < source.index : i <= destination.index; i++) {
+        todo_tasks[i].order = isMovingUp ? i + 1 : i - 1;
+      }
 
-      //start must be null to refresh the start generator function
-      updateTodos(new_todos.map((todo) => ({ ...todo, start: null })));
-    }
+      todo_tasks[source.index].order = destination.index;
 
-    if (source.droppableId !== "todo") {
-      const category_tasks = [...tasks[source.droppableId]];
-      const [removed] = category_tasks.splice(source.index, 1);
-      category_tasks.splice(destination.index, 0, removed);
-
-      updateTasks({
-        ...tasks,
-        [source.droppableId]: category_tasks,
-      });
+      updateTodos(todo_tasks);
+    } else {
+      const category_tasks: Task[] = [...tasks[source.droppableId]];
+      //reasign order property to every task depending on the destination of the drag
+      for (i; isMovingUp ? i < source.index : i <= destination.index; i++) {
+        category_tasks[i].order = isMovingUp ? i + 1 : i - 1;
+      }
+      //reasign order property to the dragged task
+      category_tasks[source.index].order = destination.index;
+      const sorted_category_tasks = category_tasks.sort(
+        (a, b) => a.order - b.order
+      );
+      updateTasks(sorted_category_tasks);
     }
   }
 
@@ -61,8 +71,23 @@ export const handleDragEnd = (result: DropResult, contexts: IContexts) => {
     destination.droppableId === "todo"
   ) {
     const task: Task = tasks[source.droppableId][source.index];
-    updateTask(task.id, { assigned: true });
-    addTodo(task, destination.index);
+    //reasign order property to every task depending on the destination of the drag
+    const todo_reordered: Todo[] = [...todos].map((todo, index) => {
+      if (index >= destination.index) {
+        todo.order = index + 1;
+      }
+      return todo;
+    });
+    //update order of todos before adding the new one
+    if (todo_reordered.length > 0) {
+      Promise.all([
+        updateTodos(todo_reordered),
+        addTodo(task, destination.index),
+      ]);
+    } else {
+      await addTodo(task, destination.index);
+    }
+    updateTask(task._id, { assigned: true });
   }
 
   if (
@@ -72,15 +97,7 @@ export const handleDragEnd = (result: DropResult, contexts: IContexts) => {
   ) {
     const todo = todos[source.index];
     const categories = Object.keys(tasks);
-
-    if (categories.includes(destination.droppableId)) {
-      const onlyExistOne =
-        todos.filter((t) => t.text === todo.text).length === 1;
-      if (onlyExistOne) updateTask(todo.from_id, { assigned: false });
-      deleteTodo(todo.id);
-
-      // // force isDraggingTodo to false, react-beautiful-dnd for some reason doesnt update isDragging
-      // updateDraggingTodo(false);
-    }
+    if (categories.includes(destination.droppableId))
+      refreshToDo(todo, contexts);
   }
 };

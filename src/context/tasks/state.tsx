@@ -1,16 +1,29 @@
 import React, { createContext, useReducer } from "react";
-import { GET_TASKS, ADD_TASK, DELETE_TASK, UPDATE_TASK } from "../types";
+import {
+  SET_TASKS,
+  ADD_TASK,
+  DELETE_TASK,
+  UPDATE_TASK,
+  UPDATE_TASKS,
+} from "../types";
 import { v4 } from "uuid";
 import reducer, { ITasksAction } from "./reducer";
 import { ITaskForm } from "components/tasks/form";
+import { add_task, delete_task, update_task, update_tasks } from "api/tasks";
+import { ObjectId } from "mongoose";
+import isEqual from "lodash.isequal";
+import { toTasksObject } from "utils/toTasksObject";
 
 export interface Task {
+  _id?: ObjectId;
   text: string;
   duration: string;
-  id: string;
+  notes?: string;
   draggableId: string;
   assigned: boolean;
   category: "daily" | "weekly" | "other";
+  order: number;
+  user: string;
 }
 
 export interface ITasksState {
@@ -22,11 +35,15 @@ export interface ITasksState {
 }
 
 export interface ITasksContext extends ITasksState {
-  getTasks: () => void;
-  addTask: (task_form: ITaskForm, category: Task["category"]) => void;
-  deleteTask: (id: Task["id"]) => void;
-  updateTask: (id: Task["id"], changes: Partial<Task>) => void;
-  updateTasks: (tasks: ITasksState["tasks"]) => void;
+  setTasks: (tasks: Task[]) => void;
+  addTask: (
+    task_form: ITaskForm,
+    category: Task["category"],
+    user: Task["user"]
+  ) => void;
+  deleteTask: (id: Task["_id"]) => void;
+  updateTask: (id: Task["_id"], changes: Partial<Task>) => void;
+  updateTasks: (tasks: Task[]) => void;
 }
 
 const initialState: ITasksState = {
@@ -46,45 +63,110 @@ const TasksProvider = ({ children }: { children: JSX.Element }) => {
     React.Reducer<ITasksState, ITasksAction>
   >(reducer, initialState);
 
-  const getTasks: ITasksContext["getTasks"] = () => {
-    const tasks =
-      JSON.parse(localStorage.getItem("tasks")) || initialState.tasks;
-    dispatch({ type: GET_TASKS, payload: tasks });
+  const setTasks: ITasksContext["setTasks"] = (tasks) => {
+    // setTasks receives tasks in the form of an array of tasks, but we need to
+    // convert it to an object with keys of daily, weekly, and other
+    //
+    // Each task has an order property, which is the index of the task in the
+    // array. We need to sort the tasks by order before we convert them to an object
+    const sortedTasks = tasks.sort((a, b) => a.order - b.order);
+    const tasksObj = sortedTasks.reduce((acc, task) => {
+      const { category } = task;
+      if (acc[category]) {
+        acc[category].push(task);
+      } else {
+        acc[category] = [task];
+      }
+      return acc;
+    }, {} as ITasksState["tasks"]);
+
+    dispatch({ type: SET_TASKS, payload: tasksObj });
   };
 
-  const addTask: ITasksContext["addTask"] = (task_form, category) => {
-    const id: Task["id"] = v4();
+  const addTask: ITasksContext["addTask"] = async (
+    task_form,
+    category,
+    user
+  ) => {
+    const id: Task["draggableId"] = v4();
     const task: Task = {
       ...task_form,
-      id,
-      draggableId: `_${id}`,
+      draggableId: id,
       assigned: false,
       category,
+      order: state.tasks[category]?.length || 0,
+      user,
     };
 
-    dispatch({
-      type: ADD_TASK,
-      payload: task,
+    try {
+      const task_response = await add_task(task);
+      const task_data = task_response.data;
+      dispatch({ type: ADD_TASK, payload: task_data });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const deleteTask: ITasksContext["deleteTask"] = async (id) => {
+    try {
+      const task_response = await delete_task(id);
+      const task_data = task_response.data;
+      dispatch({ type: DELETE_TASK, payload: task_data._id });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const updateTask: ITasksContext["updateTask"] = async (id, changes) => {
+    try {
+      const task_response = await update_task(id, changes);
+      const task_data = task_response.data;
+      dispatch({ type: UPDATE_TASK, payload: { _id: task_data._id, changes } });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const updateTasks: ITasksContext["updateTasks"] = async (tasks) => {
+    const prev_tasks = { ...state.tasks };
+
+    const prev_tasks_arr = Object.values(prev_tasks).flat();
+    const tasks_upd_arr = prev_tasks_arr.map((task) => {
+      const task_upd = tasks.find((t) => t._id === task._id);
+      return task_upd ? task_upd : task;
     });
-  };
 
-  const deleteTask: ITasksContext["deleteTask"] = (id) => {
-    dispatch({ type: DELETE_TASK, payload: id });
-  };
+    const tasks_upd_obj: ITasksState["tasks"] = toTasksObject(
+      tasks_upd_arr
+    ) as ITasksState["tasks"];
 
-  const updateTask: ITasksContext["updateTask"] = (id, changes) => {
-    dispatch({ type: UPDATE_TASK, payload: { id, changes } });
-  };
+    dispatch({ type: UPDATE_TASKS, payload: tasks_upd_obj });
 
-  const updateTasks: ITasksContext["updateTasks"] = (tasks) => {
-    dispatch({ type: GET_TASKS, payload: tasks });
+    try {
+      const tasks_response = await update_tasks(tasks);
+      const tasks_data: Task[] = tasks_response.data; //all tasks from the database after the update
+      const tasks_data_obj: ITasksState["tasks"] = toTasksObject(
+        tasks_data
+      ) as ITasksState["tasks"];
+
+      //make sure the tasks in the database are the same as the tasks in the state
+      //if they are not, set the tasks from the database to the state
+      if (!isEqual(tasks_data_obj, tasks_upd_obj)) {
+        dispatch({ type: UPDATE_TASKS, payload: tasks_data_obj });
+      }
+    } catch (err) {
+      console.error(err);
+
+      //if there is an error, set the tasks back to the previous state
+      dispatch({ type: UPDATE_TASKS, payload: prev_tasks });
+    }
   };
 
   return (
     <TasksContext.Provider
       value={{
         tasks: state.tasks,
-        getTasks,
+        setTasks,
         addTask,
         deleteTask,
         updateTask,

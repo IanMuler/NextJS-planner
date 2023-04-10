@@ -15,15 +15,18 @@ import { Template, TemplatesContext } from "context/templates/state";
 import { ITodosContext, TodosContext } from "context/todos/state";
 import { useClickOutside } from "hooks/useClickOutside";
 import CreateIcon from "components/create-icon";
+import { disassignTasks } from "utils/tasks";
+import { TasksContext } from "context/tasks/state";
 
 const Templates = () => {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const { templates, getTemplates, addTemplate, deleteTemplate } =
+  const { templates, addTemplate, deleteTemplate } =
     useContext(TemplatesContext);
-  const { todos, updateTodos } = useContext(TodosContext);
+  const { todos, addTodos, deleteTodos } = useContext(TodosContext);
+  const { tasks, updateTasks } = useContext(TasksContext);
 
   useClickOutside(ref, () => handleOpen(false));
 
@@ -32,24 +35,19 @@ const Templates = () => {
     form && setForm(false);
   };
 
-  const assignTemplate = (todos: ITodosContext["todos"]) => {
-    updateTodos(todos);
+  const assignTemplate = async (new_todos: ITodosContext["todos"]) => {
     setOpen(false);
+    await deleteTodos(todos.map((todo) => todo._id));
+    await addTodos(new_todos);
+
+    const tasks_disassigned = disassignTasks(tasks);
+    updateTasks(tasks_disassigned);
   };
 
   const createTemplate = (name: Template["name"]) => {
     addTemplate(name, todos);
     setForm(false);
   };
-
-  useEffect(() => {
-    getTemplates();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("templates", JSON.stringify(templates));
-  }, [templates]);
 
   return (
     <Container
@@ -76,11 +74,11 @@ const Templates = () => {
             />
           )}
           {templates.map((template) => (
-            <TemplateItem key={template.id}>
+            <TemplateItem key={template._id}>
               <TemplateText onClick={() => assignTemplate(template.todos)}>
                 {template.name}
               </TemplateText>
-              <DeleteIcon onClick={() => deleteTemplate(template.id)} />
+              <DeleteIcon onClick={() => deleteTemplate(template._id)} />
             </TemplateItem>
           ))}
         </TemplateItems>

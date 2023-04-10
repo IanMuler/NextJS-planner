@@ -5,6 +5,7 @@ export const Item = styled.li<{ isDragging: boolean }>`
   justify-content: space-between;
   align-items: center;
   background-color: ${({ isDragging }) => (isDragging ? "#f5f5f58a" : "")};
+  position: relative;
 `;
 
 export const Duration = styled.span`

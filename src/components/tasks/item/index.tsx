@@ -1,8 +1,9 @@
 import { GeneralContext } from "context/general/state";
 import { TasksContext } from "context/tasks/state";
 import { TodosContext } from "context/todos/state";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { Task } from "context/tasks/state";
+import { useClickOutside } from "hooks/useClickOutside";
 import {
   Item,
   Duration,
@@ -10,30 +11,38 @@ import {
   Options,
   EditIcon,
   DeleteIcon,
+  NotesIcon,
+  Notes,
   Container,
 } from "./style";
 
 interface IComponentProps {
-  setEditForm: (id: Task["id"]) => void;
+  setEditForm: (id: Task["_id"]) => void;
   task: Task;
   isDragging: boolean;
 }
 
 const TaskItem = ({ task, setEditForm, isDragging }: IComponentProps) => {
-  const [hover, setHover] = useState<boolean>(false);
   const { deleteTask } = useContext(TasksContext);
-  const { deleteTodo } = useContext(TodosContext);
+  const { todos, deleteTodo } = useContext(TodosContext);
   const { updateDraggingTask, updateVisible } = useContext(GeneralContext);
+  const [notesIsOpen, setNotesIsOpen] = useState(false);
+  const notesRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(notesRef, () => setNotesIsOpen(false));
 
   useEffect(() => {
     updateDraggingTask(isDragging);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDragging]);
 
-  const handleDelete = (id: Task["id"]) => {
+  const handleDelete = (id: Task["_id"]) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       deleteTask(id);
-      if (task.assigned) deleteTodo(id);
+
+      const todos_from_task = todos.filter((todo) => todo.task === id);
+      todos_from_task.forEach((todo) => {
+        if (task.assigned) deleteTodo(todo._id);
+      });
     }
   };
 
@@ -43,30 +52,32 @@ const TaskItem = ({ task, setEditForm, isDragging }: IComponentProps) => {
       to Item cannot be added margin-bottom so padding-bottom will be added here  */}
       <Item
         assigned={task.assigned}
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
         onTouchMove={() => isDragging && updateVisible(false)}
       >
+        {task.notes && (
+          <>
+            <NotesIcon onClick={() => setNotesIsOpen(true)} />
+            {notesIsOpen && <Notes ref={notesRef}>{task.notes}</Notes>}
+          </>
+        )}
         <Text>{task.text}</Text>
-        {hover && (
-          <Options>
-            <EditIcon
-              onClick={() => {
-                setEditForm(task.id);
-              }}
-            />
-            <DeleteIcon
-              onClick={() => {
-                handleDelete(task.id);
-              }}
-            />
-          </Options>
-        )}
-        {!hover && (
-          <Duration>
-            {task.duration !== "00:00" ? task.duration.slice(1) : null}
-          </Duration>
-        )}
+        {/*<Options> visible on hover */}
+        <Options>
+          <EditIcon
+            onClick={() => {
+              setEditForm(task._id);
+            }}
+          />
+          <DeleteIcon
+            onClick={() => {
+              handleDelete(task._id);
+            }}
+          />
+        </Options>
+        {/*<Duration> hidden on hover */}
+        <Duration>
+          {task.duration !== "00:00" ? task.duration.slice(1) : null}
+        </Duration>
       </Item>
     </Container>
   );

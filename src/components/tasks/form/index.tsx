@@ -1,20 +1,15 @@
 import { Task, TasksContext } from "context/tasks/state";
 import { TodosContext } from "context/todos/state";
-import { useState, useContext, useEffect } from "react";
-import {
-  ConfirmTask,
-  CreateTaskContainer,
-  CreateTaskInput,
-  CreateTaskItem,
-  CreateTaskItemDuration,
-} from "./style";
+import { useSession } from "next-auth/react";
+import { useState, useContext, useEffect, useCallback } from "react";
+import { ConfirmTask, Container, Input, Item, Duration, Notes } from "./style";
 
-export interface ITaskForm extends Pick<Task, "text" | "duration"> {
-  id?: Task["id"];
+export interface ITaskForm extends Pick<Task, "text" | "duration" | "notes"> {
+  _id?: Task["_id"];
 }
 
 interface IComponentProps {
-  editId?: Task["id"];
+  editId?: Task["_id"];
   category?: Task["category"];
   setFormVisible: (value: boolean) => void;
 }
@@ -23,10 +18,12 @@ const TaskForm = ({ editId, category, setFormVisible }: IComponentProps) => {
   const initialState: ITaskForm = {
     text: "",
     duration: "",
+    notes: "",
   };
 
+  const { data: session } = useSession();
   const [formState, setFormState] = useState<ITaskForm>(initialState);
-  const { updateTodo } = useContext(TodosContext);
+  const { todos, updateTodo } = useContext(TodosContext);
   const { tasks, updateTask, addTask } = useContext(TasksContext);
 
   const selectOptions: string[] = [
@@ -65,45 +62,74 @@ const TaskForm = ({ editId, category, setFormVisible }: IComponentProps) => {
     "08:00",
   ];
 
+  // Set the form state when the component mounts or editId changes
   useEffect(() => {
     if (editId) {
-      const task = tasks[category].find((task) => task.id === editId);
-      const { text, duration, id } = task;
-      setFormState({ text, duration, id });
+      const task = tasks[category].find((task) => task._id === editId);
+      const { text, duration, notes, _id } = task;
+      setFormState({ text, duration, notes, _id });
     } else {
       setFormState({ ...initialState });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editId]);
 
-  const handlePress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.type === "click") {
-      if (formState.text && formState.duration) {
-        if (formState.id) {
-          updateTask(formState.id, formState);
-          updateTodo(formState.id, {
-            text: formState.text,
-            duration: formState.duration,
-          });
-        } else {
-          addTask(formState, category);
-        }
-        setFormVisible(false);
-        setFormState({ ...initialState });
-      } else {
-        if (!formState.text) {
-          alert("Please enter a task name");
-        } else {
-          alert("Please enter a task duration");
-        }
-      }
+  const validateForm = () => {
+    if (!formState.text) {
+      alert("Please enter a task name");
+      return false;
+    }
+    if (!formState.duration) {
+      alert("Please enter a task duration");
+      return false;
+    }
+    return true;
+  };
+
+  const updateOrCreateTask = () => {
+    if (formState._id) {
+      // If the form has an id, it means that we are editing a task
+      updateTask(formState._id, formState);
+      // Update todos related to the task
+      const todos_from_task = todos.filter(
+        (todo) => todo.task === formState._id
+      );
+      todos_from_task.forEach((todo) => {
+        const { _id, ...rest } = formState; // Remove the _id from the formState
+        updateTodo(todo._id, {
+          ...rest,
+        });
+      });
+    } else {
+      const user_email = session?.user?.email;
+      addTask(formState, category, user_email);
     }
   };
 
+  const handleSubmit = () => {
+    if (validateForm()) {
+      updateOrCreateTask();
+      setFormVisible(false);
+      setFormState({ ...initialState });
+    }
+  };
+
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        handleSubmit();
+      }
+    },
+    [handleSubmit]
+  );
+
+  const handleClick = useCallback(() => {
+    handleSubmit();
+  }, [handleSubmit]);
+
   return (
-    <CreateTaskContainer>
-      <CreateTaskItem onKeyPress={handlePress}>
-        <CreateTaskInput
+    <Container>
+      <Item onKeyPress={handleKeyPress}>
+        <Input
           value={formState.text}
           type="text"
           id="name"
@@ -114,7 +140,7 @@ const TaskForm = ({ editId, category, setFormVisible }: IComponentProps) => {
             setFormState({ ...formState, text: e.target.value });
           }}
         />
-        <CreateTaskItemDuration
+        <Duration
           value={formState.duration}
           onChange={(e) => {
             setFormState({ ...formState, duration: e.target.value });
@@ -125,10 +151,22 @@ const TaskForm = ({ editId, category, setFormVisible }: IComponentProps) => {
               {option}
             </option>
           ))}
-        </CreateTaskItemDuration>
-      </CreateTaskItem>
-      <ConfirmTask onClick={handlePress} />
-    </CreateTaskContainer>
+        </Duration>
+        <Notes //text area for notes
+          value={formState.notes}
+          type="text"
+          id="notes"
+          name="notes"
+          autoComplete="off"
+          placeholder="Add notes"
+          onChange={(e) => {
+            setFormState({ ...formState, notes: e.target.value });
+            console.log(formState);
+          }}
+        />
+      </Item>
+      <ConfirmTask onClick={handleClick} />
+    </Container>
   );
 };
 
