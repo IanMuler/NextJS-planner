@@ -22,6 +22,10 @@ const TaskSchema: Schema<ITask> = new Schema<ITask, ITaskModel>(
       trim: true,
       maxlength: [7, "duration cannot be grater than 7 characters"],
     },
+    notes: {
+      type: String,
+      required: false,
+    },
     draggableId: {
       type: String,
       required: [true, "The task draggableId is required "],

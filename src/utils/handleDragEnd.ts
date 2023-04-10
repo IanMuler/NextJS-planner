@@ -4,7 +4,10 @@ import { IContexts } from "pages";
 import { DropResult } from "react-beautiful-dnd";
 import { Todo } from "context/todos/state";
 
-export const handleDragEnd = (result: DropResult, contexts: IContexts) => {
+export const handleDragEnd = async (
+  result: DropResult,
+  contexts: IContexts
+) => {
   const { destination, source } = result;
   const { tasks, updateTask, updateTasks } = contexts.tasks_context;
   const { todos, addTodo, updateTodos } = contexts.todos_context;
@@ -68,7 +71,6 @@ export const handleDragEnd = (result: DropResult, contexts: IContexts) => {
     destination.droppableId === "todo"
   ) {
     const task: Task = tasks[source.droppableId][source.index];
-    updateTask(task._id, { assigned: true });
     //reasign order property to every task depending on the destination of the drag
     const todo_reordered: Todo[] = [...todos].map((todo, index) => {
       if (index >= destination.index) {
@@ -77,8 +79,15 @@ export const handleDragEnd = (result: DropResult, contexts: IContexts) => {
       return todo;
     });
     //update order of todos before adding the new one
-    if (todo_reordered.length > 0) updateTodos(todo_reordered);
-    addTodo(task, destination.index);
+    if (todo_reordered.length > 0) {
+      Promise.all([
+        updateTodos(todo_reordered),
+        addTodo(task, destination.index),
+      ]);
+    } else {
+      await addTodo(task, destination.index);
+    }
+    updateTask(task._id, { assigned: true });
   }
 
   if (

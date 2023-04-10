@@ -5,6 +5,7 @@ export const theme = {
         title: "3rem",
         category: "2.5rem",
         task: "1.8rem",
+        notes: "1.3rem",
         nav: "1.5rem",
       },
       xl: {
@@ -27,5 +28,6 @@ export const theme = {
     blue: "#413df7",
     gradient:
       "linear-gradient(to top, rgba(0, 0, 0, 0) 0%,rgba(0, 0, 0, 0.4) 100%)",
+    gray: "#999999",
   },
 };

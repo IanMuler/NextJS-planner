@@ -1,4 +1,37 @@
-import { useEffect, useState, useContext, useRef } from "react";
+// Built-in and third-party modules
+import React, { useEffect, useState, useContext, useRef } from "react";
+import { getServerSession } from "next-auth/next";
+import { useSession } from "next-auth/react";
+import { DragDropContext } from "react-beautiful-dnd";
+import { GetServerSideProps, NextPage } from "next";
+
+// Components
+import TodoList from "components/todos/list";
+import TasksContainer from "components/tasks/container";
+import Templates from "components/templates";
+import DeleteIcon from "components/delete-icon";
+import LoadingSpinner from "components/loading-spinner";
+
+// Contexts
+import { GeneralContext, type IGeneralContext } from "context/general/state";
+import { Task, TasksContext, type ITasksContext } from "context/tasks/state";
+import { Todo, TodosContext, type ITodosContext } from "context/todos/state";
+import { Template, TemplatesContext } from "context/templates/state";
+
+// Utilities
+import { handleDragEnd } from "utils/handleDragEnd";
+import { refreshToDoList } from "utils/todo";
+
+// Hooks
+import { useSwipe } from "hooks/useSwipe";
+
+// API
+import { get_tasks } from "api/tasks";
+import { get_todos } from "api/todos";
+import { get_templates } from "api/templates";
+import { authOptions } from "pages/api/auth/[...nextauth]";
+
+// Styles
 import {
   Container,
   Application,
@@ -9,26 +42,6 @@ import {
   Options,
   ArrowIcon,
 } from "styles/home";
-import { handleDragEnd } from "utils/handleDragEnd";
-import { DragDropContext } from "react-beautiful-dnd";
-import { refreshToDoList } from "utils/todo";
-import TodoList from "components/todos/list";
-import TasksContainer from "components/tasks/container";
-import { useSwipe } from "hooks/useSwipe";
-import { GeneralContext, type IGeneralContext } from "context/general/state";
-import DeleteIcon from "components/delete-icon";
-import LoadingSpinner from "components/loading-spinner";
-import { Task, TasksContext, type ITasksContext } from "context/tasks/state";
-import { Todo, TodosContext, type ITodosContext } from "context/todos/state";
-import { Template, TemplatesContext } from "context/templates/state";
-import Templates from "components/templates";
-import { get_tasks } from "api/tasks";
-import { GetServerSideProps, NextPage } from "next";
-import { get_todos } from "api/todos";
-import { get_templates } from "api/templates";
-import { authOptions } from "pages/api/auth/[...nextauth]";
-import { getServerSession } from "next-auth/next";
-import { useSession } from "next-auth/react";
 
 export interface IContexts {
   general_context: IGeneralContext;

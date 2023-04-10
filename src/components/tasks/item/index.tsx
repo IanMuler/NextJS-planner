@@ -1,8 +1,9 @@
 import { GeneralContext } from "context/general/state";
 import { TasksContext } from "context/tasks/state";
 import { TodosContext } from "context/todos/state";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { Task } from "context/tasks/state";
+import { useClickOutside } from "hooks/useClickOutside";
 import {
   Item,
   Duration,
@@ -10,6 +11,8 @@ import {
   Options,
   EditIcon,
   DeleteIcon,
+  NotesIcon,
+  Notes,
   Container,
 } from "./style";
 
@@ -23,6 +26,10 @@ const TaskItem = ({ task, setEditForm, isDragging }: IComponentProps) => {
   const { deleteTask } = useContext(TasksContext);
   const { todos, deleteTodo } = useContext(TodosContext);
   const { updateDraggingTask, updateVisible } = useContext(GeneralContext);
+  const [notesIsOpen, setNotesIsOpen] = useState(false);
+  const notesRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(notesRef, () => setNotesIsOpen(false));
 
   useEffect(() => {
     updateDraggingTask(isDragging);
@@ -47,6 +54,12 @@ const TaskItem = ({ task, setEditForm, isDragging }: IComponentProps) => {
         assigned={task.assigned}
         onTouchMove={() => isDragging && updateVisible(false)}
       >
+        {task.notes && (
+          <>
+            <NotesIcon onClick={() => setNotesIsOpen(true)} />
+            {notesIsOpen && <Notes ref={notesRef}>{task.notes}</Notes>}
+          </>
+        )}
         <Text>{task.text}</Text>
         {/*<Options> visible on hover */}
         <Options>

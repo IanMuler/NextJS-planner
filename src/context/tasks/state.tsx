@@ -18,6 +18,7 @@ export interface Task {
   _id?: ObjectId;
   text: string;
   duration: string;
+  notes?: string;
   draggableId: string;
   assigned: boolean;
   category: "daily" | "weekly" | "other";

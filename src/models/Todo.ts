@@ -22,6 +22,10 @@ const TodoSchema: Schema<ITodo> = new Schema<ITodo, ITodoModel>(
       trim: true,
       maxlength: [7, "duration cannot be grater than 7 characters"],
     },
+    notes: {
+      type: String,
+      required: false,
+    },
     draggableId: {
       type: String,
       required: [true, "The todo draggableId is required "],
