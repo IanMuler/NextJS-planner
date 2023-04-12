@@ -214,6 +214,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
   const user_email = session?.user?.email;
 
+  if (!user_email) {
+    return {
+      props: {
+        db_tasks: [],
+        db_todos: [],
+        db_templates: [],
+      },
+    };
+  }
+
   const tasks_response = await get_tasks(user_email);
   const todos_response = await get_todos(user_email);
   const templates_response = await get_templates(user_email);
