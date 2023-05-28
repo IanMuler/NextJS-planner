@@ -12,7 +12,7 @@ export const Container = styled.div`
     font-size: ${theme.font.size.sm.task};
   }
 
-  ${up("md")} {
+  ${up("xl")} {
     * {
       font-size: ${theme.font.size.xl.task};
     }
@@ -28,7 +28,7 @@ export const Item = styled.div`
   background-color: #f0eeeb;
   border-radius: 10px;
 
-  ${up("md")} {
+  ${up("xl")} {
     padding: 0.6rem 1rem;
 `;
 
@@ -84,7 +84,7 @@ export const ConfirmTask = styled(CheckCircleOutline)`
   margin: auto;
   color: #6cd66cb0;
 
-  ${up("md")} {
+  ${up("xl")} {
     width: 35px;
     height: 35px;
   }

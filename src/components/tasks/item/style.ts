@@ -46,7 +46,7 @@ export const Item = styled.div<{ assigned: boolean }>`
     display: none;
   }
 
-  ${up("md")} {
+  ${up("xl")} {
     font-size: ${theme.font.size.xl.task};
     height: 40px;
     padding: 0 1rem;

@@ -14,7 +14,7 @@ export const Application = styled.div`
 export const Container = styled.div`
   margin-top: 2rem;
 
-  ${up("md")} {
+  ${up("xl")} {
     padding: 0 4rem;
     display: flex;
     gap: 3rem;
@@ -26,7 +26,7 @@ export const TodoContainer = styled.div`
     font-size: ${theme.font.size.sm.task};
   }
 
-  ${up("md")} {
+  ${up("xl")} {
     * {
       font-size: ${theme.font.size.xl.task};
     }
@@ -45,7 +45,7 @@ export const TodoOptions = styled.div`
   align-items: center;
   margin-bottom: 2rem;
 
-  ${up("md")} {
+  ${up("xl")} {
   }
 `;
 
@@ -63,7 +63,7 @@ export const Options = styled.div`
   align-items: space-between;
   gap: 1rem;
 
-  ${up("md")} {
+  ${up("xl")} {
     height: 30px;
   }
 `;

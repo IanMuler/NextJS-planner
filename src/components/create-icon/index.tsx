@@ -17,7 +17,7 @@ export const Container = styled.button<{ size?: number }>`
         width: 35px;
         height: 35px;
 
-        ${up("md")} {
+        ${up("xl")} {
           width: 25px;
           height: 25px;
       `;
@@ -26,7 +26,7 @@ export const Container = styled.button<{ size?: number }>`
       width: 45px;
       height: 45px;
     
-      ${up("md")} {
+      ${up("xl")} {
         width: 35px;
         height: 35px;
       }

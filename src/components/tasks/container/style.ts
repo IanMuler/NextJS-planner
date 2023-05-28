@@ -14,7 +14,7 @@ export const Container = styled.div<{ visible: boolean; top: number }>`
   z-index: 1;
   overflow-y: auto;
 
-  ${up("md")} {
+  ${up("xl")} {
     width: calc(100% - ${theme.todos.list.minWidth} - 12rem);
     height: 80vh;
     display: flex;

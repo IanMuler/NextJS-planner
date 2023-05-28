@@ -12,7 +12,7 @@ export const Todos = styled.ul`
     border-radius: 10px;
   }
 
-  ${up("md")} {
+  ${up("xl")} {
     li {
       padding: 1.2rem;
     }
