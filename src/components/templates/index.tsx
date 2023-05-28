@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useRef } from "react";
+import { useState, useContext, useRef, useEffect } from "react";
 import {
   Container,
   Create,
@@ -10,6 +10,8 @@ import {
   TemplateItems,
   TemplateText,
   Text,
+  CloseIcon,
+  Modal,
 } from "./style";
 import { Template, TemplatesContext } from "context/templates/state";
 import { ITodosContext, TodosContext } from "context/todos/state";
@@ -17,8 +19,13 @@ import { useClickOutside } from "hooks/useClickOutside";
 import CreateIcon from "components/create-icon";
 import { disassignTasks } from "utils/tasks";
 import { TasksContext } from "context/tasks/state";
+import { IGeneralContext } from "context/general/state";
 
-const Templates = () => {
+interface IComponentProps {
+  isDraggingTask: IGeneralContext["isDraggingTask"];
+}
+
+const Templates = ({ isDraggingTask }: IComponentProps) => {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -33,6 +40,18 @@ const Templates = () => {
   const handleOpen = (value: boolean) => {
     setOpen(value);
     form && setForm(false);
+    //scroll to top
+    if (value) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    //block scroll
+    if (!value) {
+      document.body.style.overflow = "auto";
+    }
+    if (value) {
+      document.body.style.overflow = "hidden";
+    }
   };
 
   const assignTemplate = async (new_todos: ITodosContext["todos"]) => {
@@ -49,47 +68,54 @@ const Templates = () => {
     setForm(false);
   };
 
+  //mobile swipe to show tasks lists still works when modal is open,
+  //so we need to close it if we are dragging a task
+  useEffect(() => {
+    if (isDraggingTask) {
+      setOpen(false);
+    }
+  }, [isDraggingTask]);
+
   return (
-    <Container
-      open={open}
-      onClick={() => (!open ? setOpen(true) : null)}
-      ref={ref}
-    >
+    <>
       {open && (
-        <TemplateItems>
-          <Create onClick={() => setForm(!form)}>
-            <CreateIcon size="sm" />
-            <CreateText>Add current list as template</CreateText>
-          </Create>
-          {form && (
-            <NameInput
-              type="text"
-              placeholder="Template name"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  createTemplate(e.currentTarget.value);
-                }
-              }}
-            />
-          )}
-          {templates.map((template) => (
-            <TemplateItem key={template._id}>
-              <TemplateText onClick={() => assignTemplate(template.todos)}>
-                {template.name}
-              </TemplateText>
-              <DeleteIcon onClick={() => deleteTemplate(template._id)} />
-            </TemplateItem>
-          ))}
-        </TemplateItems>
+        <Modal>
+          <CloseIcon onTouchEnd={() => handleOpen(false)} />
+          <TemplateItems>
+            <Create onClick={() => setForm(!form)}>
+              <CreateIcon size="sm" />
+              <CreateText>Add current list as template</CreateText>
+            </Create>
+            {form && (
+              <NameInput
+                type="text"
+                placeholder="Template name"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    createTemplate(e.currentTarget.value);
+                  }
+                }}
+              />
+            )}
+            {templates.map((template) => (
+              <TemplateItem key={template._id}>
+                <TemplateText onClick={() => assignTemplate(template.todos)}>
+                  {template.name}
+                </TemplateText>
+                <DeleteIcon onClick={() => deleteTemplate(template._id)} />
+              </TemplateItem>
+            ))}
+          </TemplateItems>
+        </Modal>
       )}
       {!open && (
-        <>
+        <Container onClick={() => handleOpen(true)} ref={ref}>
           <Icon />
           <Text>Templates</Text>
-        </>
+        </Container>
       )}
-    </Container>
+    </>
   );
 };
 

@@ -71,6 +71,7 @@ export const handleDragEnd = async (
     destination.droppableId === "todo"
   ) {
     const task: Task = tasks[source.droppableId][source.index];
+
     //reasign order property to every task depending on the destination of the drag
     const todo_reordered: Todo[] = [...todos].map((todo, index) => {
       if (index >= destination.index) {
@@ -78,15 +79,12 @@ export const handleDragEnd = async (
       }
       return todo;
     });
+
+    if (todo_reordered.length > 0) updateTodos(todo_reordered);
+
     //update order of todos before adding the new one
-    if (todo_reordered.length > 0) {
-      Promise.all([
-        updateTodos(todo_reordered),
-        addTodo(task, destination.index),
-      ]);
-    } else {
-      await addTodo(task, destination.index);
-    }
+    await addTodo(task, destination.index);
+
     updateTask(task._id, { assigned: true });
   }
 
