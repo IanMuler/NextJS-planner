@@ -20,6 +20,7 @@ export const useHomeLogic = (session: Session, contexts: IContexts) => {
   const { setTemplates } = templates_context;
 
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
     if (!session || !session.user) {
       setIsLoading(false);
       return;
