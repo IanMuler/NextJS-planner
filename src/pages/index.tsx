@@ -130,7 +130,6 @@ const Home: NextPage = () => {
                   </TodoOptions>
                 </div>
                 <TodoList wakeUpTime={wakeUpTime} />
-                {/* at this moment only desktop version has templates */}
                 <Templates isDraggingTask={isDraggingTask} />
               </TodoContainer>
               <TasksContainer visible={tasksVisible} top={todoTop} />
