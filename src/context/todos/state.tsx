@@ -102,9 +102,12 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
         return todo;
       });
 
-      if (!isEqual(new_todos_list, new_todos_sorted)) {
-        await updateTodos(new_todos_sorted_updated);
-      }
+      // new todos list will be equal to the new todos sorted if the new todo is added in the last position
+      // updateTodos is only called if the new todo is not in the last position, to reorder the rest of todos
+      // if (!isEqual(new_todos_list, new_todos_sorted)) {
+      //   console.log("update todos");
+      //   await updateTodos(new_todos_sorted_updated);
+      // }
     } catch (error) {
       console.error(error);
       dispatch({ type: SET_TODOS, payload: prev_todos });
