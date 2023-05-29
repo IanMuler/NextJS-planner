@@ -94,8 +94,16 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
         },
       });
 
+      // update the new todo in the new todos list to update by API
+      const new_todos_sorted_updated = new_todos_sorted.map((todo) => {
+        if (todo.draggableId === todo_data.draggableId) {
+          return todo_data;
+        }
+        return todo;
+      });
+
       if (!isEqual(new_todos_list, new_todos_sorted)) {
-        await update_todos(state.todos);
+        await updateTodos(new_todos_sorted_updated);
       }
     } catch (error) {
       console.error(error);
