@@ -3,6 +3,7 @@ import type { ITasksContext, Task } from "context/tasks/state";
 import { IContexts } from "pages";
 import { DropResult } from "react-beautiful-dnd";
 import { ITodosContext, Todo } from "context/todos/state";
+import { IGeneralContext } from "context/general/state";
 
 export const handleDragEnd = async (
   result: DropResult,
@@ -11,7 +12,8 @@ export const handleDragEnd = async (
   const { destination, source } = result;
   if (!destination) return;
 
-  const { tasks_context, todos_context } = contexts;
+  const { tasks_context, todos_context, general_context } = contexts;
+  const wake_up_time = general_context.wakeUpTime;
 
   // if the item is dropped in the same place, no action is required
   if (isDroppedAtSamePlace(destination, source)) return;
@@ -23,7 +25,13 @@ export const handleDragEnd = async (
 
   // Reorder in the same list
   if (isReorderInSameList(destination, source)) {
-    handleReorder(destination, source, tasks_context, todos_context);
+    handleReorder(
+      destination,
+      source,
+      tasks_context,
+      todos_context,
+      wake_up_time
+    );
   }
 
   // tasks lists to todo list
@@ -32,7 +40,8 @@ export const handleDragEnd = async (
       destination,
       source,
       todos_context,
-      tasks_context
+      tasks_context,
+      wake_up_time
     );
   }
 
@@ -93,14 +102,22 @@ const handleReorder = (
   destination: DropResult["destination"],
   source: DropResult["source"],
   tasks_context: ITasksContext,
-  todos_context: ITodosContext
+  todos_context: ITodosContext,
+  wake_up_time: IGeneralContext["wakeUpTime"]
 ) => {
   const isMovingUp = destination.index < source.index;
   let i = isMovingUp ? destination.index : source.index;
   const sourceId = source.droppableId;
 
   if (sourceId === "todo") {
-    handleTodoReorder(source, destination, isMovingUp, i, todos_context);
+    handleTodoReorder(
+      source,
+      destination,
+      isMovingUp,
+      i,
+      todos_context,
+      wake_up_time
+    );
   } else {
     handleTaskReorder(source, destination, isMovingUp, i, tasks_context);
   }
@@ -111,7 +128,8 @@ const handleTodoReorder = (
   destination: DropResult["destination"],
   isMovingUp: boolean,
   i: number,
-  todos_context: ITodosContext
+  todos_context: ITodosContext,
+  wake_up_time: IGeneralContext["wakeUpTime"]
 ) => {
   const todo_tasks: Todo[] = [...todos_context.todos];
 
@@ -122,7 +140,7 @@ const handleTodoReorder = (
 
   todo_tasks[source.index].order = destination.index;
 
-  todos_context.updateTodos(todo_tasks);
+  todos_context.updateTodos(todo_tasks, wake_up_time);
 };
 
 const handleTaskReorder = (
@@ -152,9 +170,12 @@ const handleTaskToTodoList = async (
   destination: DropResult["destination"],
   source: DropResult["source"],
   todos_context: ITodosContext,
-  tasks_context: ITasksContext
+  tasks_context: ITasksContext,
+  wake_up_time: IGeneralContext["wakeUpTime"]
 ) => {
   const task: Task = tasks_context.tasks[source.droppableId][source.index];
-  await todos_context.addTodo(task, destination.index);
+
+  await todos_context.addTodo(task, destination.index, wake_up_time);
+
   tasks_context.updateTask(task._id, { assigned: true });
 };

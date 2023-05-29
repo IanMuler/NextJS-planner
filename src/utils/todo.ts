@@ -43,17 +43,12 @@ export const refreshToDo: RefreshToDo = (todo, contexts) => {
 
 type AddWakeUpTime = (
   todos: ITodosContext["todos"],
-  updateTodos: ITodosContext["updateTodos"],
   wakeUpTime: IGeneralState["wakeUpTime"]
-) => void;
+) => Todo[];
 
-export const addWakeUpTime: AddWakeUpTime = (
-  todos,
-  updateTodos,
-  wakeUpTime
-) => {
+export const addWakeUpTime: AddWakeUpTime = (todos, wakeUpTime) => {
   const todos_list = [...todos];
-  todos_list.forEach((todo, index) => {
+  todos_list?.forEach((todo, index) => {
     const start = todos_list
       .slice(0, index)
       .reduce(
@@ -64,10 +59,10 @@ export const addWakeUpTime: AddWakeUpTime = (
     todo.start = start;
   });
 
-  updateTodos(todos_list);
+  return todos_list;
 };
 
-export const isTodoStartsUpdated = (todos: Todo[]) => {
+export const isTodoStartsUpdated = (todos: Todo[]): boolean => {
   let isUpdated = true;
 
   for (let index = 0; index < todos.length - 1; index++) {

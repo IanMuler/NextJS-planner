@@ -8,16 +8,6 @@ import { TodosContext } from "context/todos/state";
 const TodoList = ({ wakeUpTime }) => {
   const { todos, updateTodos } = useContext(TodosContext);
 
-  useEffect(() => {
-    if (!wakeUpTime || todos.length === 0) return;
-
-    const isFirstStartRight: boolean = todos[0].start === wakeUpTime;
-
-    if (isFirstStartRight && isTodoStartsUpdated(todos)) return;
-
-    addWakeUpTime(todos, updateTodos, wakeUpTime);
-  }, [todos, wakeUpTime]);
-
   return (
     <Droppable droppableId="todo">
       {(droppableProvided) => (

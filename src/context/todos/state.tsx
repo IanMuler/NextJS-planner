@@ -12,6 +12,7 @@ import {
   add_todos,
 } from "api/todos";
 import isEqual from "lodash.isequal";
+import { addWakeUpTime } from "utils/todo";
 
 export interface Todo extends Omit<Task, "assigned"> {
   start?: string;
@@ -24,12 +25,12 @@ export interface ITodosState {
 
 export interface ITodosContext extends ITodosState {
   setTodos: (todos: ITodosState["todos"]) => void;
-  addTodo: (task: Task, destination: number) => void;
+  addTodo: (task: Task, destination: number, wakeUpTime?: string) => void;
   addTodos: (todos: ITodosState["todos"]) => void;
   deleteTodo: (id: Todo["_id"]) => void;
   updateTodo: (id: Todo["_id"], changes: Partial<Todo>) => void;
   deleteTodos: (ids: Todo["_id"][]) => void;
-  updateTodos: (todos: ITodosState["todos"]) => void;
+  updateTodos: (todos: ITodosState["todos"], wakeUpTime: string) => void;
 }
 
 const initialState: ITodosState = {
@@ -51,14 +52,18 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
     dispatch({ type: SET_TODOS, payload: sortedTodos });
   };
 
-  const addTodo: ITodosContext["addTodo"] = async (task, destination) => {
+  const addTodo: ITodosContext["addTodo"] = async (
+    task,
+    destination,
+    wakeUpTime
+  ) => {
     const prev_todos = [...state.todos];
 
     const { _id, assigned, ...rest } = task;
     const id: Todo["draggableId"] = v4();
     const todo: Todo = {
       ...rest,
-      start: null,
+      start: state.todos.length === 0 ? wakeUpTime : null,
       draggableId: id,
       task: _id,
       order: destination,
@@ -77,9 +82,11 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
       return actual_todo;
     });
 
-    const new_todos_sorted = todos_reordered.sort((a, b) => a.order - b.order);
+    const new_todos_list_sorted = todos_reordered.sort(
+      (a, b) => a.order - b.order
+    );
 
-    dispatch({ type: SET_TODOS, payload: new_todos_sorted });
+    dispatch({ type: SET_TODOS, payload: new_todos_list_sorted });
 
     try {
       const todo_response = await add_todo(todo);
@@ -95,19 +102,19 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
       });
 
       // update the new todo in the new todos list to update by API
-      const new_todos_sorted_updated = new_todos_sorted.map((todo) => {
+      const todos_reordered_updated = todos_reordered.map((todo) => {
         if (todo.draggableId === todo_data.draggableId) {
           return todo_data;
         }
         return todo;
       });
 
-      // new todos list will be equal to the new todos sorted if the new todo is added in the last position
-      // updateTodos is only called if the new todo is not in the last position, to reorder the rest of todos
-      // if (!isEqual(new_todos_list, new_todos_sorted)) {
-      //   console.log("update todos");
-      //   await updateTodos(new_todos_sorted_updated);
-      // }
+      // if new todos list has only one element, it will have start value
+      // so we don't need to update todos
+      if (new_todos_list.length > 1) {
+        console.log("update todos");
+        await updateTodos(todos_reordered_updated, wakeUpTime);
+      }
     } catch (error) {
       console.error(error);
       dispatch({ type: SET_TODOS, payload: prev_todos });
@@ -183,18 +190,25 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
     }
   };
 
-  const updateTodos: ITodosContext["updateTodos"] = async (todos) => {
+  const updateTodos: ITodosContext["updateTodos"] = async (
+    todos,
+    wakeUpTime
+  ) => {
     const prev_todos = [...state.todos];
-
     const sorted_todos = todos.sort((a, b) => a.order - b.order);
-    dispatch({ type: SET_TODOS, payload: sorted_todos });
+    const todos_with_start = addWakeUpTime(sorted_todos, wakeUpTime);
+    dispatch({ type: SET_TODOS, payload: todos_with_start });
     try {
       const todos_response = await update_todos(todos);
       const todos_data = todos_response.data;
       const sorted_todos_data = todos_data.sort((a, b) => a.order - b.order);
+      const todos_with_start_data = addWakeUpTime(
+        sorted_todos_data,
+        wakeUpTime
+      );
 
       if (!isEqual(sorted_todos_data, sorted_todos)) {
-        dispatch({ type: SET_TODOS, payload: sorted_todos_data });
+        dispatch({ type: SET_TODOS, payload: todos_with_start_data });
       }
     } catch (error) {
       console.error(error);
