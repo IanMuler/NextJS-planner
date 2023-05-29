@@ -1,12 +1,5 @@
 import React, { createContext, useReducer } from "react";
-import {
-  SET_TODOS,
-  ADD_TODO,
-  UPDATE_TODO,
-  DELETE_TODO,
-  DELETE_TODOS,
-  UPDATE_TODOS,
-} from "../types";
+import { SET_TODOS, UPDATE_TODO, DELETE_TODO, DELETE_TODOS } from "../types";
 import reducer, { ITodosAction } from "./reducer";
 import { Task } from "../tasks/state";
 import { v4 } from "uuid";
@@ -71,7 +64,22 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
       order: destination,
     };
 
-    dispatch({ type: ADD_TODO, payload: todo });
+    const new_todos_list = [...state.todos, todo];
+
+    //reasign order property to every task depending on the destination of the drag
+    const todos_reordered: Todo[] = new_todos_list.map((actual_todo) => {
+      if (
+        actual_todo.order >= destination &&
+        actual_todo.draggableId !== todo.draggableId
+      ) {
+        actual_todo.order += 1;
+      }
+      return actual_todo;
+    });
+
+    const new_todos_sorted = todos_reordered.sort((a, b) => a.order - b.order);
+
+    dispatch({ type: SET_TODOS, payload: new_todos_sorted });
 
     try {
       const todo_response = await add_todo(todo);
@@ -85,6 +93,10 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
           changes: { _id: todo_data._id },
         },
       });
+
+      if (!isEqual(new_todos_list, new_todos_sorted)) {
+        await update_todos(state.todos);
+      }
     } catch (error) {
       console.error(error);
       dispatch({ type: SET_TODOS, payload: prev_todos });
@@ -164,20 +176,20 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
     const prev_todos = [...state.todos];
 
     const sorted_todos = todos.sort((a, b) => a.order - b.order);
-    dispatch({ type: UPDATE_TODOS, payload: sorted_todos });
+    dispatch({ type: SET_TODOS, payload: sorted_todos });
     try {
       const todos_response = await update_todos(todos);
       const todos_data = todos_response.data;
       const sorted_todos_data = todos_data.sort((a, b) => a.order - b.order);
 
       if (!isEqual(sorted_todos_data, sorted_todos)) {
-        dispatch({ type: UPDATE_TODOS, payload: sorted_todos_data });
+        dispatch({ type: SET_TODOS, payload: sorted_todos_data });
       }
     } catch (error) {
       console.error(error);
 
       // If there is an error, revert the state to the previous state
-      dispatch({ type: UPDATE_TODOS, payload: prev_todos });
+      dispatch({ type: SET_TODOS, payload: prev_todos });
     }
   };
 

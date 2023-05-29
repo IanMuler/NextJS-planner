@@ -1,11 +1,4 @@
-import {
-  UPDATE_TODO,
-  DELETE_TODO,
-  SET_TODOS,
-  ADD_TODO,
-  DELETE_TODOS,
-  UPDATE_TODOS,
-} from "../types";
+import { UPDATE_TODO, DELETE_TODO, SET_TODOS, DELETE_TODOS } from "../types";
 import { ITodosState, Todo } from "./state";
 
 export interface ITodosAction {
@@ -31,18 +24,6 @@ export default function reducer(state: ITodosState, action: ITodosAction) {
       return {
         ...state,
         todos,
-      };
-
-    case ADD_TODO:
-      const todo_add = payload as Todo;
-
-      const ordered_todos = [...state.todos, todo_add].sort(
-        (a, b) => a.order - b.order
-      );
-
-      return {
-        ...state,
-        todos: ordered_todos,
       };
 
     case DELETE_TODO:
@@ -79,14 +60,6 @@ export default function reducer(state: ITodosState, action: ITodosAction) {
         ...state,
         todos: todos_del,
       };
-
-    case UPDATE_TODOS:
-      const todos_upd = payload as Todo[];
-      return {
-        ...state,
-        todos: todos_upd,
-      };
-
     default:
       return state;
   }
