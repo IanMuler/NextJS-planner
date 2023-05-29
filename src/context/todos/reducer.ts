@@ -23,7 +23,7 @@ export default function reducer(state: ITodosState, action: ITodosAction) {
       const todos = payload as Todo[];
       return {
         ...state,
-        todos,
+        todos: todos,
       };
 
     case DELETE_TODO:
