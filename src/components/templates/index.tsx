@@ -72,7 +72,7 @@ const Templates = ({ isDraggingTask }: IComponentProps) => {
   //so we need to close it if we are dragging a task
   useEffect(() => {
     if (isDraggingTask) {
-      setOpen(false);
+      handleOpen(false);
     }
   }, [isDraggingTask]);
 
