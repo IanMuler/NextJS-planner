@@ -6,6 +6,8 @@ import { up } from "styled-breakpoints";
 import { theme } from "styles/theme";
 
 export const Container = styled.div`
+  display: flex;
+  align-items: center;
   padding: 0.5rem 1rem;
   cursor: pointer;
   color: #999;
@@ -48,7 +50,7 @@ export const Create = styled.div`
 `;
 
 export const CreateText = styled.span`
-  font-size: 17px;
+  font-size: 1.8rem;
   font-weight: 100;
   color: #ffffff;
 `;

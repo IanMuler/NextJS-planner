@@ -4,6 +4,7 @@ import ContextProvider from "../context";
 import { SessionProvider } from "next-auth/react";
 import Head from "next/head";
 import Header from "components/header";
+import { SnackbarProvider } from "notistack";
 
 export default function App({
   Component,
@@ -18,10 +19,12 @@ export default function App({
         <link rel="icon" href="https://i.imgur.com/L8Ege78.png" />
       </Head>
       <ContextProvider>
-        <SessionProvider session={session}>
-          <Header>Planner</Header>
-          <Component {...pageProps} />
-        </SessionProvider>
+        <SnackbarProvider maxSnack={3}>
+          <SessionProvider session={session}>
+            <Header>Planner</Header>
+            <Component {...pageProps} />
+          </SessionProvider>
+        </SnackbarProvider>
       </ContextProvider>
     </>
   );

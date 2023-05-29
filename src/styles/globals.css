@@ -14,3 +14,7 @@
 html {
   font-size: 62.5%;
 }
+
+#notistack-snackbar {
+  font-size: 1.5rem; 
+}

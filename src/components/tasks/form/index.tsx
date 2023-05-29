@@ -146,6 +146,9 @@ const TaskForm = ({ editId, category, setFormVisible }: IComponentProps) => {
             setFormState({ ...formState, duration: e.target.value });
           }}
         >
+          <option value="" hidden disabled>
+            Duration
+          </option>
           {selectOptions.map((option) => (
             <option key={option} value={option}>
               {option}

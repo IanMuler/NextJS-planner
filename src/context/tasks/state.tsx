@@ -13,6 +13,7 @@ import { add_task, delete_task, update_task, update_tasks } from "api/tasks";
 import { ObjectId } from "mongoose";
 import isEqual from "lodash.isequal";
 import { toTasksObject } from "utils/toTasksObject";
+import { enqueueSnackbar } from "notistack";
 
 export interface Task {
   _id?: ObjectId;
@@ -97,6 +98,13 @@ const TasksProvider = ({ children }: { children: JSX.Element }) => {
       order: state.tasks[category]?.length || 0,
       user,
     };
+
+    if (!user) {
+      enqueueSnackbar("You have to be logged in to add a task", {
+        variant: "error",
+      });
+      return;
+    }
 
     try {
       const task_response = await add_task(task);

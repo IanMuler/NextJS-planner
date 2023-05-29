@@ -80,7 +80,10 @@ const Templates = ({ isDraggingTask }: IComponentProps) => {
     <>
       {open && (
         <Modal ref={ref}>
-          <CloseIcon onTouchEnd={() => handleOpen(false)} />
+          <CloseIcon
+            onTouchEnd={() => handleOpen(false)}
+            onClick={() => handleOpen(false)}
+          />
           <TemplateItems>
             <Create onClick={() => setForm(!form)}>
               <CreateIcon size="sm" />

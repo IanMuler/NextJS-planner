@@ -3,6 +3,7 @@ import { SET_TEMPLATES, ADD_TEMPLATE, DELETE_TEMPLATE } from "../types";
 import reducer, { ITemplatesAction } from "./reducer";
 import { Todo } from "../todos/state";
 import { add_template, delete_template } from "api/templates";
+import { enqueueSnackbar } from "notistack";
 
 export interface Template {
   _id?: string;
@@ -42,8 +43,15 @@ const TemplatesProvider = ({ children }: { children: JSX.Element }) => {
     const template: Template = {
       name,
       todos,
-      user: todos[0].user,
+      user: todos[0]?.user,
     };
+
+    if (!template.user) {
+      enqueueSnackbar("You have to be logged in to save a template", {
+        variant: "error",
+      });
+      return;
+    }
 
     try {
       const template_response = await add_template(template);
