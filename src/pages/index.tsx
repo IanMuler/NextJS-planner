@@ -62,7 +62,7 @@ const Home: NextPage = () => {
     isDraggingTodo,
     isDraggingTask,
     tasksVisible,
-    wakeUpTime,
+    wake_up_time,
     handleWakeUpTime,
     handleDragEnd,
   } = useHomeLogic(session, contexts);
@@ -103,7 +103,7 @@ const Home: NextPage = () => {
                 <div ref={todoRef}>
                   <TodoOptions>
                     <TimeWakeUp
-                      value={wakeUpTime}
+                      value={wake_up_time}
                       type="time"
                       onChange={handleWakeUpTime}
                     />
@@ -129,7 +129,7 @@ const Home: NextPage = () => {
                     </Options>
                   </TodoOptions>
                 </div>
-                <TodoList wakeUpTime={wakeUpTime} />
+                <TodoList />
                 <Templates isDraggingTask={isDraggingTask} />
               </TodoContainer>
               <TasksContainer visible={tasksVisible} top={todoTop} />

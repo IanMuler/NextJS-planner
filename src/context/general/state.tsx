@@ -9,7 +9,7 @@ import {
 import reducer, { IGeneralAction } from "./reducer";
 
 export interface IGeneralState {
-  wakeUpTime: string;
+  wake_up_time: string;
   tasksVisible: boolean;
   isDraggingTodo: boolean;
   isDraggingTask: boolean;
@@ -26,7 +26,7 @@ export interface IGeneralContext extends IGeneralState {
 }
 
 const initialState: IGeneralState = {
-  wakeUpTime: "08:00",
+  wake_up_time: "08:00",
   tasksVisible: false,
   isDraggingTodo: false,
   isDraggingTask: false,
@@ -43,11 +43,13 @@ const GeneralProvider = ({ children }: { children: JSX.Element }) => {
   >(reducer, initialState);
 
   const getStart: IGeneralContext["getStart"] = () => {
-    const wakeUpTime = localStorage.getItem("wakeUpTime");
-    if (wakeUpTime) dispatch({ type: UPDATE_START, payload: wakeUpTime });
+    const wake_up_time = localStorage.getItem("wake_up_time");
+    if (wake_up_time) dispatch({ type: UPDATE_START, payload: wake_up_time });
   };
-  const updateStart: IGeneralContext["updateStart"] = (time) =>
+  const updateStart: IGeneralContext["updateStart"] = (time) => {
+    localStorage.setItem("wake_up_time", time);
     dispatch({ type: UPDATE_START, payload: time });
+  };
   const updateVisible: IGeneralContext["updateVisible"] = (value) =>
     dispatch({ type: UPDATE_VISIBLE, payload: value });
   const updateDraggingTodo: IGeneralContext["updateDraggingTodo"] = (value) =>
@@ -60,7 +62,7 @@ const GeneralProvider = ({ children }: { children: JSX.Element }) => {
   return (
     <GeneralContext.Provider
       value={{
-        wakeUpTime: state.wakeUpTime,
+        wake_up_time: state.wake_up_time,
         tasksVisible: state.tasksVisible,
         isDraggingTodo: state.isDraggingTodo,
         isDraggingTask: state.isDraggingTask,

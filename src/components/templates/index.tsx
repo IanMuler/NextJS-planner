@@ -41,21 +41,14 @@ const Templates = ({ isDraggingTask }: IComponentProps) => {
     setOpen(value);
     form && setForm(false);
     //scroll to top
-    if (value) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    value && window.scrollTo({ top: 0, behavior: "smooth" });
 
     //block scroll
-    if (!value) {
-      document.body.style.overflow = "auto";
-    }
-    if (value) {
-      document.body.style.overflow = "hidden";
-    }
+    document.body.style.overflow = value ? "hidden" : "auto";
   };
 
   const assignTemplate = async (new_todos: ITodosContext["todos"]) => {
-    setOpen(false);
+    handleOpen(false);
     await deleteTodos(todos.map((todo) => todo._id));
     await addTodos(new_todos);
 

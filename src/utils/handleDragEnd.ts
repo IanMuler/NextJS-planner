@@ -13,7 +13,7 @@ export const handleDragEnd = async (
   if (!destination) return;
 
   const { tasks_context, todos_context, general_context } = contexts;
-  const wake_up_time = general_context.wakeUpTime;
+  const wake_up_time = general_context.wake_up_time;
 
   // if the item is dropped in the same place, no action is required
   if (isDroppedAtSamePlace(destination, source)) return;
@@ -103,7 +103,7 @@ const handleReorder = (
   source: DropResult["source"],
   tasks_context: ITasksContext,
   todos_context: ITodosContext,
-  wake_up_time: IGeneralContext["wakeUpTime"]
+  wake_up_time: IGeneralContext["wake_up_time"]
 ) => {
   const isMovingUp = destination.index < source.index;
   let i = isMovingUp ? destination.index : source.index;
@@ -129,7 +129,7 @@ const handleTodoReorder = (
   isMovingUp: boolean,
   i: number,
   todos_context: ITodosContext,
-  wake_up_time: IGeneralContext["wakeUpTime"]
+  wake_up_time: IGeneralContext["wake_up_time"]
 ) => {
   const todo_tasks: Todo[] = [...todos_context.todos];
 
@@ -171,7 +171,7 @@ const handleTaskToTodoList = async (
   source: DropResult["source"],
   todos_context: ITodosContext,
   tasks_context: ITasksContext,
-  wake_up_time: IGeneralContext["wakeUpTime"]
+  wake_up_time: IGeneralContext["wake_up_time"]
 ) => {
   const task: Task = tasks_context.tasks[source.droppableId][source.index];
 

@@ -25,12 +25,12 @@ export interface ITodosState {
 
 export interface ITodosContext extends ITodosState {
   setTodos: (todos: ITodosState["todos"]) => void;
-  addTodo: (task: Task, destination: number, wakeUpTime?: string) => void;
+  addTodo: (task: Task, destination: number, wake_up_time?: string) => void;
   addTodos: (todos: ITodosState["todos"]) => void;
   deleteTodo: (id: Todo["_id"]) => void;
   updateTodo: (id: Todo["_id"], changes: Partial<Todo>) => void;
   deleteTodos: (ids: Todo["_id"][]) => void;
-  updateTodos: (todos: ITodosState["todos"], wakeUpTime: string) => void;
+  updateTodos: (todos: ITodosState["todos"], wake_up_time: string) => void;
 }
 
 const initialState: ITodosState = {
@@ -55,7 +55,7 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
   const addTodo: ITodosContext["addTodo"] = async (
     task,
     destination,
-    wakeUpTime
+    wake_up_time
   ) => {
     const prev_todos = [...state.todos];
 
@@ -63,7 +63,7 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
     const id: Todo["draggableId"] = v4();
     const todo: Todo = {
       ...rest,
-      start: state.todos.length === 0 ? wakeUpTime : null,
+      start: state.todos.length === 0 ? wake_up_time : null,
       draggableId: id,
       task: _id,
       order: destination,
@@ -111,10 +111,8 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
 
       // if new todos list has only one element, it will have start value
       // so we don't need to update todos
-      if (new_todos_list.length > 1) {
-        console.log("update todos");
-        await updateTodos(todos_reordered_updated, wakeUpTime);
-      }
+      new_todos_list.length > 1 &&
+        (await updateTodos(todos_reordered_updated, wake_up_time));
     } catch (error) {
       console.error(error);
       dispatch({ type: SET_TODOS, payload: prev_todos });
@@ -192,21 +190,25 @@ const TodosProvider = ({ children }: { children: JSX.Element }) => {
 
   const updateTodos: ITodosContext["updateTodos"] = async (
     todos,
-    wakeUpTime
+    wake_up_time
   ) => {
     const prev_todos = [...state.todos];
     const sorted_todos = todos.sort((a, b) => a.order - b.order);
-    const todos_with_start = addWakeUpTime(sorted_todos, wakeUpTime);
+    const todos_with_start = addWakeUpTime(sorted_todos, wake_up_time);
+
     dispatch({ type: SET_TODOS, payload: todos_with_start });
+
     try {
       const todos_response = await update_todos(todos);
       const todos_data = todos_response.data;
       const sorted_todos_data = todos_data.sort((a, b) => a.order - b.order);
       const todos_with_start_data = addWakeUpTime(
         sorted_todos_data,
-        wakeUpTime
+        wake_up_time
       );
 
+      // if the todos on the server are different from the todos on the client
+      // update the todos on the client
       if (!isEqual(sorted_todos_data, sorted_todos)) {
         dispatch({ type: SET_TODOS, payload: todos_with_start_data });
       }

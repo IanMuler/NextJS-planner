@@ -5,8 +5,8 @@ import TodoItem from "../item";
 import { addWakeUpTime, isTodoStartsUpdated } from "utils/todo";
 import { TodosContext } from "context/todos/state";
 
-const TodoList = ({ wakeUpTime }) => {
-  const { todos, updateTodos } = useContext(TodosContext);
+const TodoList = () => {
+  const { todos } = useContext(TodosContext);
 
   return (
     <Droppable droppableId="todo">

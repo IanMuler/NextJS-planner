@@ -24,14 +24,14 @@ export default function reducer(
       const start_get = payload as string;
       return {
         ...state,
-        wakeUpTime: start_get,
+        wake_up_time: start_get,
       };
 
     case UPDATE_START:
       const start_upd = payload as string;
       return {
         ...state,
-        wakeUpTime: start_upd,
+        wake_up_time: start_upd,
       };
 
     case UPDATE_VISIBLE:

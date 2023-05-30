@@ -13,10 +13,11 @@ export const useHomeLogic = (session: Session, contexts: IContexts) => {
   const [isDesktop, setIsDesktop] = useState<boolean>(false);
   const { general_context, tasks_context, todos_context, templates_context } =
     contexts;
-  const { wakeUpTime, isDraggingTodo, tasksVisible, isDraggingTask } =
+  const { wake_up_time, isDraggingTodo, tasksVisible, isDraggingTask } =
     general_context;
   const { setTasks } = tasks_context;
-  const { todos, setTodos } = todos_context;
+  const { todos, setTodos, updateTodos } = todos_context;
+  const { getStart, updateStart } = general_context;
   const { setTemplates } = templates_context;
 
   const fetchData = useCallback(async () => {
@@ -47,7 +48,10 @@ export const useHomeLogic = (session: Session, contexts: IContexts) => {
   }, []);
 
   const handleWakeUpTime = (e) => {
-    general_context.updateStart(e.target.value);
+    const wake_up_time = e.target.value;
+
+    updateStart(wake_up_time);
+    todos.length > 0 && updateTodos(todos, wake_up_time);
   };
 
   const handleDragEndCallback = (result) => {
@@ -61,11 +65,7 @@ export const useHomeLogic = (session: Session, contexts: IContexts) => {
   }, [session?.user]);
 
   useEffect(() => {
-    localStorage.setItem("wakeUpTime", wakeUpTime);
-  }, [wakeUpTime]);
-
-  useEffect(() => {
-    general_context.getStart();
+    getStart();
     handleDesktop();
     fetchData();
   }, []);
@@ -77,7 +77,7 @@ export const useHomeLogic = (session: Session, contexts: IContexts) => {
     isDraggingTodo,
     isDraggingTask,
     tasksVisible,
-    wakeUpTime,
+    wake_up_time,
     handleWakeUpTime,
     handleDragEnd: handleDragEndCallback,
   };
